@@ -1,62 +1,67 @@
 {
-	"name": "baha-rpg-plugin-v2",
-	"version": "1.0.0",
-	"description": "Baha RPG Enhancement Plugin",
-	"main": "src/index.tsx",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "npx rollup --config rollup.config.js",
-		"watch": "npx rollup --config rollup.config.js --watch",
-		"dev": "node -r esm server.js",
-		"serve": "node -r esm server.js",
-		"start": "node -r esm server.js",
-		"build:release": "npx rollup --config rollup.config.js --sourcemap 0 --file dist/release-$npm_package_version.user.js",
-		"build:release:win32": "npx rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
-		"version": "npm run build:release && git add dist/release-$npm_package_version.user.js",
-		"prepublishOnly": "npm run build:release && git add dist/release-$npm_package_version.user.js"
-	},
-	"author": "SilWolf",
-	"license": "ISC",
-	"devDependencies": {
-		"@babel/cli": "^7.18.9",
-		"@babel/core": "^7.18.9",
-		"@babel/plugin-proposal-class-properties": "^7.18.6",
-		"@babel/preset-react": "^7.18.6",
-		"@rollup/plugin-babel": "^5.3.1",
-		"@rollup/plugin-commonjs": "^22.0.1",
-		"@rollup/plugin-node-resolve": "^13.3.0",
-		"@rollup/plugin-replace": "^4.0.0",
-		"@rollup/plugin-typescript": "^8.3.3",
-		"@types/react": "^18.0.15",
-		"@typescript-eslint/eslint-plugin": "^5.30.7",
-		"@typescript-eslint/parser": "^5.30.7",
-		"colorette": "^2.0.19",
-		"eslint": "^8.20.0",
-		"eslint-config-google": "^0.14.0",
-		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-react": "^7.30.1",
-		"esm": "^3.2.25",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"rollup": "^2.77.0",
-		"rollup-plugin-userscript-metablock": "^0.3.1",
-		"serve": "^14.0.1",
-		"tslib": "^2.4.0",
-		"typescript": "^4.7.4"
-	},
-	"browserslist": {
-		"production": [
-			">0.2%",
-			"not dead",
-			"not op_mini all"
-		],
-		"development": [
-			"last 1 chrome version",
-			"last 1 firefox version",
-			"last 1 safari version"
-		]
-	},
-	"config": {
-		"port": "8124"
-	}
+  "name": "baha-rpg-plugin-v2",
+  "version": "1.0.0",
+  "description": "Baha RPG Enhancement Plugin",
+  "main": "src/index.tsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx rollup --config rollup.config.js",
+    "watch": "npx rollup --config rollup.config.js --watch",
+    "dev": "node -r esm server_new.js",
+    "serve": "node -r esm server.js",
+    "start": "node -r esm server.js",
+    "build:release": "npx rollup --config rollup.config.js --sourcemap 0 --file dist/release-$npm_package_version.user.js",
+    "build:release:win32": "npx rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
+    "version": "npm run build:release && git add dist/release-$npm_package_version.user.js",
+    "prepublishOnly": "npm run build:release && git add dist/release-$npm_package_version.user.js"
+  },
+  "author": "SilWolf",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.18.9",
+    "@babel/core": "^7.18.9",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/preset-react": "^7.18.6",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@rollup/plugin-typescript": "^8.3.3",
+    "@tanstack/react-query": "^4.0.10",
+    "@types/react": "^18.0.15",
+    "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.30.7",
+    "autoprefixer": "^10.4.7",
+    "colorette": "^2.0.19",
+    "eslint": "^8.20.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-react": "^7.30.1",
+    "esm": "^3.2.25",
+    "postcss": "^8.4.14",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rollup": "^2.77.0",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-userscript-metablock": "^0.3.1",
+    "serve": "^14.0.1",
+    "tailwindcss": "^3.1.6",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "config": {
+    "port": "8124"
+  }
 }

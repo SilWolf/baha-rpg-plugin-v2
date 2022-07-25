@@ -5,6 +5,11 @@ import replace from '@rollup/plugin-replace'
 import typescriptPlugin from '@rollup/plugin-typescript'
 import typescript from 'typescript'
 import metablock from 'rollup-plugin-userscript-metablock'
+import postcss from 'rollup-plugin-postcss'
+import autoprefixer from 'autoprefixer'
+import tailwindcss from 'tailwindcss'
+
+const tailwindConfig = require('./tailwind.config.js')
 
 const fs = require('fs')
 const pkg = require('./package.json')
@@ -33,6 +38,7 @@ export default {
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,
     }),
+
     nodeResolve({ extensions: ['.js', '.ts', '.tsx'] }),
     typescriptPlugin({ typescript }),
     commonjs({
@@ -40,6 +46,10 @@ export default {
       exclude: ['node_modules/process-es6/**'],
     }),
     babel({ babelHelpers: 'bundled' }),
+    postcss({
+      extensions: ['.css', '.module.css'],
+      plugins: [autoprefixer(), tailwindcss(tailwindConfig)],
+    }),
     metablock({
       file: './meta.json',
       override: {

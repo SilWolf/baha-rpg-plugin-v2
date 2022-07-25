@@ -1,0 +1,59 @@
+@tailwind base;
+
+@layer base {
+  #bahaRpgPluginV2App blockquote,
+  #bahaRpgPluginV2App dl,
+  #bahaRpgPluginV2App dd,
+  #bahaRpgPluginV2App h1,
+  #bahaRpgPluginV2App h2,
+  #bahaRpgPluginV2App h3,
+  #bahaRpgPluginV2App h4,
+  #bahaRpgPluginV2App h5,
+  #bahaRpgPluginV2App h6,
+  #bahaRpgPluginV2App hr,
+  #bahaRpgPluginV2App figure,
+  #bahaRpgPluginV2App p,
+  #bahaRpgPluginV2App pre {
+    margin: 0;
+  }
+
+  #bahaRpgPluginV2App h1,
+  #bahaRpgPluginV2App h2,
+  #bahaRpgPluginV2App h3,
+  #bahaRpgPluginV2App h4,
+  #bahaRpgPluginV2App h5,
+  #bahaRpgPluginV2App h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  #bahaRpgPluginV2App ol,
+  #bahaRpgPluginV2App ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #bahaRpgPluginV2App img,
+  #bahaRpgPluginV2App svg,
+  #bahaRpgPluginV2App video,
+  #bahaRpgPluginV2App canvas,
+  #bahaRpgPluginV2App audio,
+  #bahaRpgPluginV2App iframe,
+  #bahaRpgPluginV2App embed,
+  #bahaRpgPluginV2App object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  #bahaRpgPluginV2App *,
+  #bahaRpgPluginV2App::before,
+  #bahaRpgPluginV2App::after {
+    border-width: 0;
+    border-style: solid;
+    border-color: theme('borderColor.DEFAULT', currentColor);
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
