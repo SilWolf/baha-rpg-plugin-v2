@@ -1,11 +1,12 @@
-import * as ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import React from 'react'
 
 import App from './App'
 
-const root = document.createElement('div')
-root.setAttribute('id', 'bahaRpgPluginV2App')
+const container = document.createElement('div')
+container.setAttribute('id', 'bahaRpgPluginV2App')
 
-document.body.prepend(root)
+document.body.prepend(container)
 
-ReactDOM.render(<App />, root)
+const root = createRoot(container!)
+root.render(<App />)

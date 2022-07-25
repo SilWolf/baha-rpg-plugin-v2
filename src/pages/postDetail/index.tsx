@@ -1,21 +1,31 @@
-import React, { useEffect } from 'react'
+import React from 'react'
+import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
 
 const PostDetailPage = () => {
-  useEffect(() => {
-    fetch(
-      'https://api.gamer.com.tw/guild/v1/post_detail.php?gsn=3014&messageId=27236629',
-      {
-        credentials: 'include',
-      }
+  const { bahaPost, isLoading } = useBahaPost()
+
+  if (isLoading) {
+    return (
+      <MasterLayout>
+        <div className="mx-auto max-w-screen-sm">讀取中……</div>
+      </MasterLayout>
     )
-      .then((res) => res.json())
-      .then((res) => console.log(res))
-  }, [])
+  }
+
+  if (!bahaPost) {
+    return (
+      <MasterLayout>
+        <div className="mx-auto max-w-screen-sm">
+          <p className="text-red-600">無法讀取內容！</p>
+        </div>
+      </MasterLayout>
+    )
+  }
 
   return (
     <MasterLayout>
-      <div className="mx-auto max-w-screen-sm">123123123</div>
+      <div className="mx-auto max-w-screen-sm">{bahaPost.content}</div>
     </MasterLayout>
   )
 }
