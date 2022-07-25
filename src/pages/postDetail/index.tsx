@@ -1,11 +1,15 @@
 import React from 'react'
+import TextRenderer from '../../components/TextRenderer'
 import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
 
 const PostDetailPage = () => {
-  const { bahaPost, isLoading } = useBahaPost()
+  const { bahaPost, bahaComments, isLoadingPost, isLoadingComments } =
+    useBahaPost()
 
-  if (isLoading) {
+  console.log(bahaComments)
+
+  if (isLoadingPost || isLoadingComments) {
     return (
       <MasterLayout>
         <div className="mx-auto max-w-screen-sm">讀取中……</div>
@@ -13,7 +17,7 @@ const PostDetailPage = () => {
     )
   }
 
-  if (!bahaPost) {
+  if (!bahaPost || !bahaComments) {
     return (
       <MasterLayout>
         <div className="mx-auto max-w-screen-sm">
@@ -25,7 +29,17 @@ const PostDetailPage = () => {
 
   return (
     <MasterLayout>
-      <div className="mx-auto max-w-screen-sm">{bahaPost.content}</div>
+      <div className="mx-auto max-w-screen-sm">
+        <div>{bahaPost.content}</div>
+        <div className="h-px bg-gray-300 my-4"></div>
+        <div className="space-y-2">
+          {bahaComments.map((comment) => (
+            <div key={comment.id}>
+              <TextRenderer>{comment.text}</TextRenderer>
+            </div>
+          ))}
+        </div>
+      </div>
     </MasterLayout>
   )
 }
