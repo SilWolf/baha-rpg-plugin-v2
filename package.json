@@ -33,6 +33,7 @@
 		"colorette": "^2.0.19",
 		"eslint": "^8.20.0",
 		"eslint-config-google": "^0.14.0",
+		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-react": "^7.30.1",
 		"esm": "^3.2.25",
 		"react": "^18.2.0",
