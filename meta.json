@@ -1,0 +1,10 @@
+{
+	"namespace": "baha-rpg-plugin-v2",
+	"copyright": "2022, SilWolf (https://github.com/SilWolf)",
+	"require": [
+		"https://unpkg.com/react@18/umd/react.development.js",
+		"https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+	],
+	"include": ["https://guild.gamer.com.tw/post_detail.php*"],
+	"grant": ["GM.getValue"]
+}
