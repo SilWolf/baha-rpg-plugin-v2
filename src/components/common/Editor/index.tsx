@@ -5,6 +5,28 @@ type Props = {
   value?: string
 }
 
+const generateTagDiv = () => {
+  const newElement = document.createElement('div')
+  newElement.setAttribute('contenteditable', 'true')
+  newElement.classList.add(
+    'name-tag',
+    'inline-block',
+    'rounded-lg',
+    'bg-gray-500',
+    'text-white',
+    'mx-1',
+    'px-2',
+    "before:content-['@']"
+  )
+
+  newElement.addEventListener('input', (e) => {
+    e.stopPropagation()
+    console.log(e)
+  })
+
+  return newElement
+}
+
 const Editor = ({ onChange, value }: Props) => {
   const [text, setText] = useState('')
 
@@ -41,6 +63,26 @@ const Editor = ({ onChange, value }: Props) => {
     },
     [onChange]
   )
+
+  const handleClickInsert = () => {
+    const range = window.getSelection()?.getRangeAt(0)
+    if (
+      range &&
+      (range.startContainer.parentNode as HTMLElement)?.id === 'main'
+    ) {
+      // delete whatever is on the range
+      range.deleteContents()
+      // place your span
+
+      const tag = generateTagDiv()
+
+      range.insertNode(tag)
+      range.setStartAfter(tag)
+      range.collapse(true)
+      range.insertNode(document.createTextNode(' '))
+      range.collapse(true)
+    }
+  }
 
   return (
     <div>
