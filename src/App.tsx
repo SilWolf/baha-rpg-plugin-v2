@@ -7,7 +7,7 @@ import './app.css'
 const children = <PostDetailPage />
 
 const App = () => {
-  const [isAppOpened, setIsAppOpened] = React.useState<boolean>(false)
+  const [isAppOpened, setIsAppOpened] = React.useState<boolean>(true)
 
   useEffect(() => {
     if (isAppOpened) {
@@ -48,7 +48,7 @@ const App = () => {
           <div className="py-2 text-right">
             <button onClick={handleClickClose}>關閉</button>
           </div>
-          <div className="flex-1 overflow-auto min-h-0">{children}</div>
+          <div className="flex-1 h-full min-h-0">{children}</div>
         </div>
       </div>
     </PostContextProvider>

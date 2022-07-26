@@ -6,6 +6,7 @@ export type RawBahaCommentMention = {
 
 export type RawBahaComment = {
   ctime: string
+  time: string
   id: string
   mentions: RawBahaCommentMention[]
   name: string

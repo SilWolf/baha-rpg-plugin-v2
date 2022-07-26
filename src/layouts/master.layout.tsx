@@ -5,7 +5,7 @@ type Props = {
 }
 
 const MasterLayout = ({ children }: Props) => {
-  return <div className="container">{children}</div>
+  return <div className="h-full">{children}</div>
 }
 
 export default MasterLayout
