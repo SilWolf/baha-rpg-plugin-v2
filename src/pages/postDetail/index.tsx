@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react'
 import BahaCommentDiv from '../../components/BahaCommentDiv'
+import BahaCommentEditor from '../../components/BahaCommentEditor'
 import BahaPostDiv from '../../components/BahaPostDiv'
 import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
@@ -35,7 +36,7 @@ const PostDetailPage = () => {
 
   return (
     <MasterLayout>
-      <div className="px-8 flex items-stretch gap-x-2 min-h-0 w-full h-full">
+      <div className="px-8 flex items-stretch gap-x-2 min-h-0">
         <div>
           <div className="mx-auto max-w-screen-sm flex flex-col h-full">
             <div className="pb-4 mb-4 border-b border-gray-300">
@@ -57,8 +58,14 @@ const PostDetailPage = () => {
         </div>
         <div className="flex-1">
           <form onSubmit={handleSubmit}>
-            <textarea name="text" id="reply-content"></textarea>
-            <button type="submit">發送</button>
+            <div className="space-y-2">
+              <div>
+                <BahaCommentEditor />
+              </div>
+              <div>
+                <button type="submit">發送</button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
