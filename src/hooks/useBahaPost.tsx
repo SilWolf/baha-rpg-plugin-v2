@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   getRawCommentChunkWithPagination,
   getRawComments,
@@ -18,12 +24,14 @@ type PostContextProps = {
   isSendingComment?: boolean
 
   sendComment: (content: string) => Promise<unknown>
+  loadLatestComments: () => Promise<unknown>
 }
 
 const PostContext = React.createContext<PostContextProps>({
   sendComment: async () => {
     console.log('bug')
   },
+  loadLatestComments: async () => {},
 })
 
 export const PostContextProvider = ({
@@ -35,7 +43,9 @@ export const PostContextProvider = ({
   const [sn, setSn] = useState<string>()
 
   const [bahaPost, setBahaPost] = useState<RawBahaPost>()
-  const [bahaCommentChunks, setBahaCommentChunks] = useState<RawBahaComment[][]>([])
+  const [bahaCommentChunks, setBahaCommentChunks] = useState<
+    RawBahaComment[][]
+  >([])
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
   const [isSendingComment, setIsSendingComment] = useState<boolean>(false)
@@ -54,16 +64,30 @@ export const PostContextProvider = ({
     [gsn, sn]
   )
 
-  const refreshComments = useCallback(async () => {
-    const { comments: rawCommentChunk, nextPage: currentChunkIndex } = await getRawCommentChunkWithPagination(gsn, sn)
-    if (!bahaCommentChunks[currentChunkIndex] || bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length) {
+  const loadLatestComments = useCallback(async () => {
+    const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
+      await getRawCommentChunkWithPagination(gsn, sn)
+    if (
+      !bahaCommentChunks[currentChunkIndex] ||
+      bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length
+    ) {
       const newBahaCommentChunks = [...bahaCommentChunks]
       newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
-      
+
       let nextChunkIndex = currentChunkIndex - 1
-      while ()
+      while (nextChunkIndex > 0 && currentChunkIndex - nextChunkIndex > 1) {
+        newBahaCommentChunks[nextChunkIndex] =
+          await getRawCommentChunkWithPagination(
+            gsn,
+            sn,
+            nextChunkIndex + 1
+          ).then((res) => res.comments)
+        nextChunkIndex--
+      }
+
+      setBahaCommentChunks(newBahaCommentChunks)
     }
-  }, [])
+  }, [bahaCommentChunks, gsn, sn])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search)
@@ -88,7 +112,7 @@ export const PostContextProvider = ({
         .then((_comments) => {
           const newBahaCommentChunks = []
           for (let i = 0; i < _comments.length; i += 15)
-          newBahaCommentChunks.push(_comments.slice(i, i + 15))
+            newBahaCommentChunks.push(_comments.slice(i, i + 15))
           setBahaCommentChunks(newBahaCommentChunks)
         })
         .finally(() => {
@@ -105,8 +129,9 @@ export const PostContextProvider = ({
       sn,
       isLoadingPost,
       isLoadingComments,
-      sendComment,
       isSendingComment,
+      sendComment,
+      loadLatestComments,
     }),
     [
       bahaPost,
@@ -115,8 +140,9 @@ export const PostContextProvider = ({
       sn,
       isLoadingPost,
       isLoadingComments,
-      sendComment,
       isSendingComment,
+      sendComment,
+      loadLatestComments,
     ]
   )
 
@@ -125,8 +151,50 @@ export const PostContextProvider = ({
 
 type UsePostOptions = {
   refreshInterval?: number // in milliseconds
+  onSuccessLoadComments?: () => Promise<unknown>
 }
 
-const usePost = (options?: UsePostOptions) => React.useContext(PostContext)
+const usePost = (options?: UsePostOptions) => {
+  const context = useContext(PostContext)
+
+  const loadLatestComments = useCallback(() => {
+    return context.loadLatestComments().then(() => {
+      options?.onSuccessLoadComments?.()
+    })
+  }, [context, options])
+
+  const sendComment = useCallback(
+    (content: string) => {
+      return context.sendComment(content).then(loadLatestComments)
+    },
+    [context, loadLatestComments]
+  )
+
+  useEffect(() => {
+    if (
+      typeof options.refreshInterval !== 'undefined' &&
+      options.refreshInterval > 1000
+    ) {
+      let timeoutFn
+      const fn = () => {
+        loadLatestComments().then(() => {
+          timeoutFn = setTimeout(fn, options.refreshInterval)
+        })
+      }
+
+      timeoutFn = setTimeout(fn, options.refreshInterval)
+
+      return () => {
+        clearTimeout(timeoutFn)
+      }
+    }
+  }, [loadLatestComments, options.refreshInterval])
+
+  return {
+    ...context,
+    sendComment,
+    loadLatestComments,
+  }
+}
 
 export default usePost
