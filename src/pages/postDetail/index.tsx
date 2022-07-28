@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import BahaCommentDiv from '../../components/BahaCommentDiv'
-import BahaCommentEditor from '../../components/BahaCommentEditor'
+import BahaCommentTextarea from '../../components/BahaCommentTextarea'
 import BahaPostDiv from '../../components/BahaPostDiv'
 import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
@@ -11,13 +11,12 @@ const PostDetailPage = () => {
     bahaComments,
     isLoadingPost,
     isLoadingComments,
+    isSendingComment,
     sendComment,
   } = useBahaPost()
 
-  const handleEnterBahaCommentEditor = useCallback(
-    (value: string) => {
-      sendComment(value).then((res) => console.log(res))
-    },
+  const handleSubmitNewComment = useCallback(
+    (newComment: string) => sendComment(newComment as string),
     [sendComment]
   )
 
@@ -64,10 +63,11 @@ const PostDetailPage = () => {
         <div className="flex-1">
           <div className="space-y-2">
             <div>
-              <BahaCommentEditor onEnter={handleEnterBahaCommentEditor} />
-            </div>
-            <div>
-              <button type="submit">發送</button>
+              <BahaCommentTextarea
+                onSubmit={handleSubmitNewComment}
+                disabled={isSendingComment}
+                loading={isSendingComment}
+              />
             </div>
           </div>
         </div>

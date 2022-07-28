@@ -14,6 +14,7 @@ type PostContextProps = {
   sn?: string
   isLoadingPost?: boolean
   isLoadingComments?: boolean
+  isSendingComment?: boolean
 
   sendComment: (content: string) => Promise<unknown>
 }
@@ -36,14 +37,17 @@ export const PostContextProvider = ({
   const [bahaComments, setBahaComments] = useState<RawBahaComment[]>()
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
+  const [isSendingComment, setIsSendingComment] = useState<boolean>(false)
 
   const sendComment = useCallback(
     (content: string) => {
-      console.log('send comment')
+      setIsSendingComment(true)
       return postComment({
         gsn,
         sn,
         content,
+      }).finally(() => {
+        setIsSendingComment(false)
       })
     },
     [gsn, sn]
@@ -87,6 +91,7 @@ export const PostContextProvider = ({
       isLoadingPost,
       isLoadingComments,
       sendComment,
+      isSendingComment,
     }),
     [
       bahaPost,
@@ -96,6 +101,7 @@ export const PostContextProvider = ({
       isLoadingPost,
       isLoadingComments,
       sendComment,
+      isSendingComment,
     ]
   )
 

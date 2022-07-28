@@ -50,10 +50,10 @@ const TextRenderer = ({ children }: { children: string }) => {
   return (
     <p>
       {lines.map((line, i) => (
-        <>
+        <React.Fragment key={i}>
           {line}
           {i !== lines.length - 1 && <br />}
-        </>
+        </React.Fragment>
       ))}
     </p>
   )

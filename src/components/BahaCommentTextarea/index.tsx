@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react'
-// Import the Slate editor factory.
 import {
   createEditor,
   BaseEditor,
@@ -71,10 +70,21 @@ const serializeNode = (node: Node) => {
 }
 
 type Props = {
-  onEnter?: (value: string) => void
+  onChange?: () => void
+  onSubmit?: (value: string) => Promise<unknown>
+  loading?: boolean
+  disabled?: boolean
+  value?: string
 }
 
-const BahaCommentEditor = ({ onEnter }: Props) => {
+const BahaCommentEditor = ({
+  onSubmit,
+  onChange,
+  value,
+  disabled,
+  loading,
+  ...textareaProps
+}: Props) => {
   const [editor] = useState(() =>
     withCustom(withReact(withHistory(createEditor())))
   )
@@ -132,6 +142,20 @@ const BahaCommentEditor = ({ onEnter }: Props) => {
     // setMentionSearch(matched?.[1])
   }, [editor])
 
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      const text = editor.children.map((node) => serializeNode(node)).join('\n')
+      onSubmit(text).then(() => {
+        Transforms.delete(editor, {
+          at: {
+            anchor: Editor.start(editor, []),
+            focus: Editor.end(editor, []),
+          },
+        })
+      })
+    }
+  }, [editor, onSubmit])
+
   const handleChange = useCallback(() => {
     handleChangeForMention()
   }, [handleChangeForMention])
@@ -173,16 +197,10 @@ const BahaCommentEditor = ({ onEnter }: Props) => {
         !event.metaKey
       ) {
         event.preventDefault()
-
-        if (onEnter) {
-          const text = editor.children
-            .map((node) => serializeNode(node))
-            .join('\n')
-          onEnter?.(text)
-        }
+        handleSubmit()
       }
     },
-    [mentionSearch, handleKeydownForMention, onEnter, editor.children]
+    [mentionSearch, handleKeydownForMention, handleSubmit]
   )
 
   const handleBlur = useCallback(() => {
@@ -190,7 +208,7 @@ const BahaCommentEditor = ({ onEnter }: Props) => {
   }, [])
 
   return (
-    <>
+    <div className="space-y-2">
       <div className="p-4 bg-gray-100 rounded-md">
         <Slate editor={editor} value={initialValue} onChange={handleChange}>
           <Editable
@@ -199,10 +217,16 @@ const BahaCommentEditor = ({ onEnter }: Props) => {
             onKeyDown={handleKeydown}
             onBlur={handleBlur}
             placeholder="輸入回覆..."
+            readOnly={disabled}
           />
         </Slate>
       </div>
-    </>
+      <div className="text-right">
+        <button disabled={disabled} onClick={handleSubmit}>
+          提交
+        </button>
+      </div>
+    </div>
   )
 }
 
