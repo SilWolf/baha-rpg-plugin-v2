@@ -21,7 +21,6 @@ type PostContextProps = {
   sn?: string
   isLoadingPost?: boolean
   isLoadingComments?: boolean
-  isSendingComment?: boolean
 
   sendComment: (content: string) => Promise<unknown>
   loadLatestComments: () => Promise<unknown>
@@ -48,17 +47,13 @@ export const PostContextProvider = ({
   >([])
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
-  const [isSendingComment, setIsSendingComment] = useState<boolean>(false)
 
   const sendComment = useCallback(
     (content: string) => {
-      setIsSendingComment(true)
       return postComment({
         gsn,
         sn,
         content,
-      }).finally(() => {
-        setIsSendingComment(false)
       })
     },
     [gsn, sn]
@@ -129,7 +124,6 @@ export const PostContextProvider = ({
       sn,
       isLoadingPost,
       isLoadingComments,
-      isSendingComment,
       sendComment,
       loadLatestComments,
     }),
@@ -140,7 +134,6 @@ export const PostContextProvider = ({
       sn,
       isLoadingPost,
       isLoadingComments,
-      isSendingComment,
       sendComment,
       loadLatestComments,
     ]
@@ -172,7 +165,7 @@ const usePost = (options?: UsePostOptions) => {
 
   useEffect(() => {
     if (
-      typeof options.refreshInterval !== 'undefined' &&
+      typeof options?.refreshInterval !== 'undefined' &&
       options.refreshInterval > 1000
     ) {
       let timeoutFn
@@ -188,7 +181,7 @@ const usePost = (options?: UsePostOptions) => {
         clearTimeout(timeoutFn)
       }
     }
-  }, [loadLatestComments, options.refreshInterval])
+  }, [loadLatestComments, options?.refreshInterval])
 
   return {
     ...context,

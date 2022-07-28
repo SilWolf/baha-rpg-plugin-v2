@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { useState } from 'react'
 import BahaCommentDiv from '../../components/BahaCommentDiv'
 import BahaCommentTextarea from '../../components/BahaCommentTextarea'
@@ -12,17 +12,28 @@ const PostDetailPage = () => {
     setIsCollapsedPost((prev) => !prev)
   }, [])
 
+  const commentsScrollerRef = useRef<HTMLDivElement>()
+
   const {
     bahaPost,
     bahaCommentChunks,
     isLoadingPost,
     isLoadingComments,
-    isSendingComment,
     sendComment,
   } = useBahaPost()
 
   const handleSubmitNewComment = useCallback(
-    (newComment: string) => sendComment(newComment as string),
+    (newComment: string) =>
+      sendComment(newComment as string).then(() => {
+        setTimeout(() => {
+          if (commentsScrollerRef.current) {
+            commentsScrollerRef.current.scrollTo({
+              top: commentsScrollerRef.current.scrollHeight,
+              behavior: 'smooth',
+            })
+          }
+        }, 0)
+      }),
     [sendComment]
   )
 
@@ -63,7 +74,10 @@ const PostDetailPage = () => {
             </div>
 
             <div className="flex-1 min-h-0">
-              <div className="h-full overflow-y-scroll">
+              <div
+                className="h-full overflow-y-scroll"
+                ref={commentsScrollerRef}
+              >
                 <div className="space-y-2">
                   {bahaCommentChunks.map((bahaCommentChunk, chunkI) => (
                     <React.Fragment key={chunkI}>
@@ -79,11 +93,7 @@ const PostDetailPage = () => {
               </div>
             </div>
             <div>
-              <BahaCommentTextarea
-                onSubmit={handleSubmitNewComment}
-                disabled={isSendingComment}
-                loading={isSendingComment}
-              />
+              <BahaCommentTextarea onSubmit={handleSubmitNewComment} />
             </div>
           </div>
         </div>

@@ -70,26 +70,19 @@ const serializeNode = (node: Node) => {
 }
 
 type Props = {
-  onChange?: () => void
   onSubmit?: (value: string) => Promise<unknown>
-  loading?: boolean
-  disabled?: boolean
   value?: string
+  disabled?: boolean
 }
 
-const BahaCommentEditor = ({
-  onSubmit,
-  onChange,
-  value,
-  disabled,
-  loading,
-  ...textareaProps
-}: Props) => {
+const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
   const [editor] = useState(() =>
     withCustom(withReact(withHistory(createEditor())))
   )
   const [mentionTarget, setMentionTarget] = useState<Location | null>(null)
   const [mentionSearch, setMentionSearch] = useState<string | undefined>()
+
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const renderElement = useCallback((props: RenderElementProps) => {
     switch (props.element.type) {
@@ -145,14 +138,19 @@ const BahaCommentEditor = ({
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
       const text = editor.children.map((node) => serializeNode(node)).join('\n')
-      onSubmit(text).then(() => {
-        Transforms.delete(editor, {
-          at: {
-            anchor: Editor.start(editor, []),
-            focus: Editor.end(editor, []),
-          },
+      setIsSubmitting(true)
+      onSubmit(text)
+        .then(() => {
+          Transforms.delete(editor, {
+            at: {
+              anchor: Editor.start(editor, []),
+              focus: Editor.end(editor, []),
+            },
+          })
         })
-      })
+        .finally(() => {
+          setIsSubmitting(false)
+        })
     }
   }, [editor, onSubmit])
 
@@ -217,12 +215,12 @@ const BahaCommentEditor = ({
             onKeyDown={handleKeydown}
             onBlur={handleBlur}
             placeholder="輸入回覆..."
-            readOnly={disabled}
+            readOnly={isSubmitting || disabled}
           />
         </Slate>
       </div>
       <div className="text-right">
-        <button disabled={disabled} onClick={handleSubmit}>
+        <button disabled={isSubmitting || disabled} onClick={handleSubmit}>
           提交
         </button>
       </div>
