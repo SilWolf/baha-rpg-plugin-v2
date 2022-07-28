@@ -13,7 +13,7 @@ const TextRendererLink = ({ url }: { url: string }) => (
 
 const TextRenderer = ({ children }: { children: string }) => {
   const lines = children.split('\n').map((line) => {
-    const items: React.ReactNode[] = [line, '　']
+    const items: React.ReactNode[] = [line]
 
     let i = 0
     while (i < items.length) {
@@ -48,11 +48,14 @@ const TextRenderer = ({ children }: { children: string }) => {
   })
 
   return (
-    <>
+    <p>
       {lines.map((line, i) => (
-        <p key={i}>{line}</p>
+        <>
+          {line}
+          {i !== lines.length - 1 && <br />}
+        </>
       ))}
-    </>
+    </p>
   )
 }
 

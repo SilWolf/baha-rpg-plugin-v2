@@ -7,6 +7,9 @@ import {
   Editor,
   Range,
   Location,
+  Node,
+  Text,
+  Element,
 } from 'slate'
 import {
   ReactEditor,
@@ -55,7 +58,23 @@ const withCustom = (editor: Editor) => {
   return editor
 }
 
-const BahaCommentEditor = () => {
+const serializeNode = (node: Node) => {
+  if (Text.isText(node)) {
+    return Node.string(node)
+  }
+
+  if (Element.isElementType(node, 'mention')) {
+    return `${node.label} `
+  }
+
+  return node.children.map((childNode) => serializeNode(childNode)).join('')
+}
+
+type Props = {
+  onEnter?: (value: string) => void
+}
+
+const BahaCommentEditor = ({ onEnter }: Props) => {
   const [editor] = useState(() =>
     withCustom(withReact(withHistory(createEditor())))
   )
@@ -143,9 +162,27 @@ const BahaCommentEditor = () => {
     (event) => {
       if (mentionSearch) {
         handleKeydownForMention(event)
+        return
+      }
+
+      if (
+        event.key === 'Enter' &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.shiftKey &&
+        !event.metaKey
+      ) {
+        event.preventDefault()
+
+        if (onEnter) {
+          const text = editor.children
+            .map((node) => serializeNode(node))
+            .join('\n')
+          onEnter?.(text)
+        }
       }
     },
-    [mentionSearch, handleKeydownForMention]
+    [mentionSearch, handleKeydownForMention, onEnter, editor.children]
   )
 
   const handleBlur = useCallback(() => {

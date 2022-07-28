@@ -1,5 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { getRawComments, getRawPostDetail } from '../services/api.service'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  getRawComments,
+  getRawPostDetail,
+  postComment,
+} from '../services/api.service'
 import { RawBahaComment } from '../types/bahaComment.type'
 import { RawBahaPost } from '../types/bahaPost.type'
 
@@ -10,9 +14,15 @@ type PostContextProps = {
   sn?: string
   isLoadingPost?: boolean
   isLoadingComments?: boolean
+
+  sendComment: (content: string) => Promise<unknown>
 }
 
-const PostContext = React.createContext<PostContextProps>({})
+const PostContext = React.createContext<PostContextProps>({
+  sendComment: async () => {
+    console.log('bug')
+  },
+})
 
 export const PostContextProvider = ({
   children,
@@ -27,9 +37,20 @@ export const PostContextProvider = ({
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
 
+  const sendComment = useCallback(
+    (content: string) => {
+      console.log('send comment')
+      return postComment({
+        gsn,
+        sn,
+        content,
+      })
+    },
+    [gsn, sn]
+  )
+
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search)
-    console.log(new URLSearchParams(location.search))
 
     setGsn(queryParams.get('gsn') ?? undefined)
     setSn(queryParams.get('sn') ?? undefined)
@@ -46,7 +67,6 @@ export const PostContextProvider = ({
           setIsLoadingPost(false)
         })
 
-      console.log('b')
       setIsLoadingComments(true)
       getRawComments(gsn, sn)
         .then((_comments) => {
@@ -66,8 +86,17 @@ export const PostContextProvider = ({
       sn,
       isLoadingPost,
       isLoadingComments,
+      sendComment,
     }),
-    [bahaPost, bahaComments, gsn, sn, isLoadingPost, isLoadingComments]
+    [
+      bahaPost,
+      bahaComments,
+      gsn,
+      sn,
+      isLoadingPost,
+      isLoadingComments,
+      sendComment,
+    ]
   )
 
   return <PostContext.Provider value={value}>{children}</PostContext.Provider>

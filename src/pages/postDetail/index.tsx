@@ -6,15 +6,20 @@ import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
 
 const PostDetailPage = () => {
-  const { bahaPost, bahaComments, isLoadingPost, isLoadingComments } =
-    useBahaPost()
+  const {
+    bahaPost,
+    bahaComments,
+    isLoadingPost,
+    isLoadingComments,
+    sendComment,
+  } = useBahaPost()
 
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = e.currentTarget
-
-    console.log(form.elements)
-  }, [])
+  const handleEnterBahaCommentEditor = useCallback(
+    (value: string) => {
+      sendComment(value).then((res) => console.log(res))
+    },
+    [sendComment]
+  )
 
   if (isLoadingPost || isLoadingComments) {
     return (
@@ -36,7 +41,7 @@ const PostDetailPage = () => {
 
   return (
     <MasterLayout>
-      <div className="px-8 flex items-stretch gap-x-2 min-h-0">
+      <div className="px-8 flex items-stretch gap-x-2 min-h-0 h-full">
         <div>
           <div className="mx-auto max-w-screen-sm flex flex-col h-full">
             <div className="pb-4 mb-4 border-b border-gray-300">
@@ -57,16 +62,14 @@ const PostDetailPage = () => {
           </div>
         </div>
         <div className="flex-1">
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <div>
-                <BahaCommentEditor />
-              </div>
-              <div>
-                <button type="submit">發送</button>
-              </div>
+          <div className="space-y-2">
+            <div>
+              <BahaCommentEditor onEnter={handleEnterBahaCommentEditor} />
             </div>
-          </form>
+            <div>
+              <button type="submit">發送</button>
+            </div>
+          </div>
         </div>
       </div>
     </MasterLayout>
