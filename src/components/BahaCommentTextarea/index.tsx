@@ -209,10 +209,10 @@ const BahaCommentEditor = ({
 
   return (
     <div className="space-y-2">
-      <div className="p-4 bg-gray-100 rounded-md">
+      <div className="bg-gray-100 rounded-md">
         <Slate editor={editor} value={initialValue} onChange={handleChange}>
           <Editable
-            className="min-h-[192px]"
+            className="p-4 min-h-[192px]"
             renderElement={renderElement}
             onKeyDown={handleKeydown}
             onBlur={handleBlur}

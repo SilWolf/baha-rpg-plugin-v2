@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import { useState } from 'react'
 import BahaCommentDiv from '../../components/BahaCommentDiv'
 import BahaCommentTextarea from '../../components/BahaCommentTextarea'
 import BahaPostDiv from '../../components/BahaPostDiv'
@@ -6,9 +7,14 @@ import useBahaPost from '../../hooks/useBahaPost'
 import MasterLayout from '../../layouts/master.layout'
 
 const PostDetailPage = () => {
+  const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
+  const handleClickCollapsePost = useCallback(() => {
+    setIsCollapsedPost((prev) => !prev)
+  }, [])
+
   const {
     bahaPost,
-    bahaComments,
+    bahaCommentChunks,
     isLoadingPost,
     isLoadingComments,
     isSendingComment,
@@ -28,7 +34,7 @@ const PostDetailPage = () => {
     )
   }
 
-  if (!bahaPost || !bahaComments) {
+  if (!bahaPost || !bahaCommentChunks) {
     return (
       <MasterLayout>
         <div className="mx-auto max-w-screen-sm">
@@ -40,28 +46,38 @@ const PostDetailPage = () => {
 
   return (
     <MasterLayout>
-      <div className="px-8 flex items-stretch gap-x-2 min-h-0 h-full">
+      <div className="px-8 flex justify-center items-stretch gap-x-2 min-h-0 h-full">
         <div>
-          <div className="mx-auto max-w-screen-sm flex flex-col h-full">
-            <div className="pb-4 mb-4 border-b border-gray-300">
-              <BahaPostDiv post={bahaPost} />
+          <div className="mx-auto max-w-screen-sm flex flex-col h-full gap-y-4">
+            <div className="flex">
+              <div className="flex-1">
+                <div className={isCollapsedPost ? 'hidden' : ''}>
+                  <BahaPostDiv post={bahaPost} />
+                </div>
+              </div>
+              <div>
+                <button onClick={handleClickCollapsePost}>
+                  {isCollapsedPost ? '展開串頭' : '收起串頭'}
+                </button>
+              </div>
             </div>
+
             <div className="flex-1 min-h-0">
               <div className="h-full overflow-y-scroll">
                 <div className="space-y-2">
-                  {bahaComments.map((bahaComment) => (
-                    <BahaCommentDiv
-                      key={bahaComment.id}
-                      comment={bahaComment}
-                    />
+                  {bahaCommentChunks.map((bahaCommentChunk, chunkI) => (
+                    <React.Fragment key={chunkI}>
+                      {bahaCommentChunk.map((bahaComment) => (
+                        <BahaCommentDiv
+                          key={bahaComment.id}
+                          comment={bahaComment}
+                        />
+                      ))}
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="flex-1">
-          <div className="space-y-2">
             <div>
               <BahaCommentTextarea
                 onSubmit={handleSubmitNewComment}
@@ -71,6 +87,17 @@ const PostDetailPage = () => {
             </div>
           </div>
         </div>
+        {/* <div className="flex-1">
+          <div className="space-y-2">
+            <div>
+              <BahaCommentTextarea
+                onSubmit={handleSubmitNewComment}
+                disabled={isSendingComment}
+                loading={isSendingComment}
+              />
+            </div>
+          </div>
+        </div> */}
       </div>
     </MasterLayout>
   )

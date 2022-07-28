@@ -4,6 +4,13 @@ export type RawBahaCommentMention = {
   length: string
 }
 
+export type RawBahaCommentWithPagination = {
+  comments: RawBahaComment[]
+  nextPage: number
+  totalPage: number
+  commentCount: number
+}
+
 export type RawBahaComment = {
   ctime: string
   time: string

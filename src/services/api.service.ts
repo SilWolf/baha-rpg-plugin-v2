@@ -1,4 +1,7 @@
-import { RawBahaComment } from '../types/bahaComment.type'
+import {
+  RawBahaComment,
+  RawBahaCommentWithPagination,
+} from '../types/bahaComment.type'
 import { RawBahaPost } from '../types/bahaPost.type'
 
 declare const Cookies
@@ -26,6 +29,24 @@ export const getRawPostDetail = (
       credentials: 'include',
     }
   ).then((res) => res.json().then((json) => json.data) as Promise<RawBahaPost>)
+}
+
+export const getRawCommentChunkWithPagination = (
+  gsn: string | number,
+  sn: string | number,
+  page: number = 0
+): Promise<RawBahaCommentWithPagination> => {
+  return fetch(
+    `https://api.gamer.com.tw/guild/v1/comment_list.php?gsn=${gsn}&messageId=${sn}&page=${page}`,
+    {
+      credentials: 'include',
+    }
+  ).then(
+    (res) =>
+      res
+        .json()
+        .then((json) => json.data) as Promise<RawBahaCommentWithPagination>
+  )
 }
 
 export const getRawComments = (

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  getRawCommentChunkWithPagination,
   getRawComments,
   getRawPostDetail,
   postComment,
@@ -9,7 +10,7 @@ import { RawBahaPost } from '../types/bahaPost.type'
 
 type PostContextProps = {
   bahaPost?: RawBahaPost
-  bahaComments?: RawBahaComment[]
+  bahaCommentChunks?: RawBahaComment[][]
   gsn?: string
   sn?: string
   isLoadingPost?: boolean
@@ -34,7 +35,7 @@ export const PostContextProvider = ({
   const [sn, setSn] = useState<string>()
 
   const [bahaPost, setBahaPost] = useState<RawBahaPost>()
-  const [bahaComments, setBahaComments] = useState<RawBahaComment[]>()
+  const [bahaCommentChunks, setBahaCommentChunks] = useState<RawBahaComment[][]>([])
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
   const [isSendingComment, setIsSendingComment] = useState<boolean>(false)
@@ -52,6 +53,17 @@ export const PostContextProvider = ({
     },
     [gsn, sn]
   )
+
+  const refreshComments = useCallback(async () => {
+    const { comments: rawCommentChunk, nextPage: currentChunkIndex } = await getRawCommentChunkWithPagination(gsn, sn)
+    if (!bahaCommentChunks[currentChunkIndex] || bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length) {
+      const newBahaCommentChunks = [...bahaCommentChunks]
+      newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
+      
+      let nextChunkIndex = currentChunkIndex - 1
+      while ()
+    }
+  }, [])
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search)
@@ -74,7 +86,10 @@ export const PostContextProvider = ({
       setIsLoadingComments(true)
       getRawComments(gsn, sn)
         .then((_comments) => {
-          setBahaComments(_comments)
+          const newBahaCommentChunks = []
+          for (let i = 0; i < _comments.length; i += 15)
+          newBahaCommentChunks.push(_comments.slice(i, i + 15))
+          setBahaCommentChunks(newBahaCommentChunks)
         })
         .finally(() => {
           setIsLoadingComments(false)
@@ -85,7 +100,7 @@ export const PostContextProvider = ({
   const value = useMemo<PostContextProps>(
     () => ({
       bahaPost,
-      bahaComments,
+      bahaCommentChunks,
       gsn,
       sn,
       isLoadingPost,
@@ -95,7 +110,7 @@ export const PostContextProvider = ({
     }),
     [
       bahaPost,
-      bahaComments,
+      bahaCommentChunks,
       gsn,
       sn,
       isLoadingPost,
@@ -108,6 +123,10 @@ export const PostContextProvider = ({
   return <PostContext.Provider value={value}>{children}</PostContext.Provider>
 }
 
-const usePost = () => React.useContext(PostContext)
+type UsePostOptions = {
+  refreshInterval?: number // in milliseconds
+}
+
+const usePost = (options?: UsePostOptions) => React.useContext(PostContext)
 
 export default usePost
