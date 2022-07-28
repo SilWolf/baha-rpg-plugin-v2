@@ -19,6 +19,7 @@ import {
 } from 'slate-react'
 import { HistoryEditor, withHistory } from 'slate-history'
 import BahaEditorMention from './components/BahaCommentMentionSpan'
+import { postImage } from '../../services/imgur.service'
 
 type CustomText = { text: string }
 type CustomElement =
@@ -205,9 +206,46 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
     setMentionSearch(undefined)
   }, [])
 
+  const handleDragOver = useCallback<React.DragEventHandler<HTMLDivElement>>(
+    (e) => {
+      e.preventDefault()
+    },
+    []
+  )
+
+  const handleDrop = useCallback<React.DragEventHandler<HTMLDivElement>>(
+    async (e) => {
+      console.log('drop files')
+      e.preventDefault()
+
+      const files = e.dataTransfer.items
+        ? Array.from(e.dataTransfer.items).map((item) =>
+            item.kind === 'file' ? item.getAsFile() : undefined
+          )
+        : e.dataTransfer.files
+
+      for (let i = 0; i < files.length; i++) {
+        if (!files[i]) {
+          continue
+        }
+        const file = files[i]
+        if (file.type.startsWith('image/')) {
+          // TODO: file upload
+          await postImage(file)
+          // Insert image element
+        }
+      }
+    },
+    []
+  )
+
   return (
     <div className="space-y-2">
-      <div className="bg-gray-100 rounded-md">
+      <div
+        className="bg-gray-100 rounded-md"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <Slate editor={editor} value={initialValue} onChange={handleChange}>
           <Editable
             className="p-4 min-h-[192px]"
