@@ -18,13 +18,18 @@ import {
   RenderElementProps,
 } from 'slate-react'
 import { HistoryEditor, withHistory } from 'slate-history'
-import BahaEditorMention from './components/BahaCommentMentionSpan'
-import { postImage } from '../../services/imgur.service'
+import BahaCommentImageSpan, {
+  BahaCommentImageElement,
+} from './components/BahaCommentImageSpan'
+import BahaCommentMentionSpan, {
+  BahaCommentMentionElement,
+} from './components/BahaCommentMentionSpan'
 
 type CustomText = { text: string }
 type CustomElement =
-  | { type: 'paragraph'; children: CustomText[]; label?: string }
-  | { type: 'mention'; children: CustomText[]; label?: string }
+  | { type: 'paragraph'; children: CustomText[] }
+  | BahaCommentMentionElement
+  | BahaCommentImageElement
 
 declare module 'slate' {
   // eslint-disable-next-line no-unused-vars
@@ -51,9 +56,9 @@ const withCustom = (editor: Editor) => {
   const { isInline, isVoid } = editor
 
   editor.isInline = (element) =>
-    ['mention'].includes(element.type) || isInline(element)
+    ['mention', 'image'].includes(element.type) || isInline(element)
   editor.isVoid = (element) =>
-    ['mention'].includes(element.type) || isVoid(element)
+    ['mention', 'image'].includes(element.type) || isVoid(element)
 
   return editor
 }
@@ -64,7 +69,11 @@ const serializeNode = (node: Node) => {
   }
 
   if (Element.isElementType(node, 'mention')) {
-    return `${node.label} `
+    return `${(node as BahaCommentMentionElement).label} `
+  }
+
+  if (Element.isElementType(node, 'image')) {
+    return `![](${(node as BahaCommentImageElement).url}) `
   }
 
   return node.children.map((childNode) => serializeNode(childNode)).join('')
@@ -88,7 +97,9 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
   const renderElement = useCallback((props: RenderElementProps) => {
     switch (props.element.type) {
       case 'mention':
-        return <BahaEditorMention {...props} />
+        return <BahaCommentMentionSpan {...props} />
+      case 'image':
+        return <BahaCommentImageSpan {...props} />
       default:
         return <DefaultElement {...props} />
     }
@@ -230,13 +241,16 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
         }
         const file = files[i]
         if (file.type.startsWith('image/')) {
-          // TODO: file upload
-          await postImage(file)
-          // Insert image element
+          Transforms.insertNodes(editor, {
+            type: 'image',
+            children: [{ text: '' }],
+            file,
+          })
+          Transforms.move(editor)
         }
       }
     },
-    []
+    [editor]
   )
 
   return (

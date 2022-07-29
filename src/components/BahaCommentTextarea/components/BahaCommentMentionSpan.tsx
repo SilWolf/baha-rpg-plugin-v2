@@ -9,12 +9,22 @@ export type BahaCommentMentionElement = {
 
 const BahaCommentMentionSpan = (props: RenderElementProps) => {
   return (
+    // <span
+    //   className="bg-blue-400 text-white rounded mr-1 px-1 before:content-['@']"
+    //   contentEditable={false}
+    //   {...props.attributes}
+    // >
+    //   {props.element.label}
+    //   {props.children}
+    // </span>
+
     <span
-      className="bg-blue-400 text-white rounded mr-1 px-1 before:content-['@']"
+      className="bg-blue-400 text-white rounded mr-1 px-1"
       contentEditable={false}
       {...props.attributes}
     >
-      {props.element.label}
+      <i className="ri-at-line" />
+      {(props.element as BahaCommentMentionElement).label}
       {props.children}
     </span>
   )

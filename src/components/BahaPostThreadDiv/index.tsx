@@ -44,6 +44,7 @@ const BahaPostThreadDiv = ({ post, commentChunks, sendComment }: Props) => {
         </div>
         <div>
           <button onClick={handleClickCollapsePost}>
+            <i className="ri-arrow-up-s-fill" />
             {isCollapsedPost ? '展開串頭' : '收起串頭'}
           </button>
         </div>

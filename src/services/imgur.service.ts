@@ -1,6 +1,6 @@
 const IMGUR_CLIENT_ID = 'aef87581a602ff3'
 
-export const postImage = (file: File): Promise<{ link: string }> => {
+export const postImgurImage = (file: File): Promise<{ link: string }> => {
   const formData = new FormData()
   formData.append('image', file)
   // formData.append('type', 'base64')
@@ -15,6 +15,7 @@ export const postImage = (file: File): Promise<{ link: string }> => {
     .then((res) => {
       return res.json()
     })
+    .then((json) => json.data)
     .catch((e) => {
       console.log(e)
     })

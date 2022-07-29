@@ -3,6 +3,14 @@ import React from 'react'
 
 import App from './App'
 
+GM.getResourceText('REMIXICON').then((src) => {
+  src = src.replace(
+    /remixicon\./g,
+    'https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.'
+  )
+  GM.addStyle(src)
+})
+
 const container = document.createElement('div')
 container.setAttribute('id', 'bahaRpgPluginV2App')
 

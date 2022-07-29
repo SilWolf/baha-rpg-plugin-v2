@@ -37,6 +37,8 @@ interface GM {
   ): Promise<GMType.MenuCommandId>
   unregisterMenuCommand(menuCmdId: GMType.MenuCommandId): Promise<void>
 
+  getResourceText(name: string): Promise<string>
+
   addStyle(css: string): Promise<HTMLStyleElement>
 
   notification(
