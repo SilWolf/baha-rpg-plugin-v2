@@ -73,7 +73,9 @@ const serializeNode = (node: Node) => {
   }
 
   if (Element.isElementType(node, 'image')) {
-    return `![](${(node as BahaCommentImageElement).url}) `
+    return (node as BahaCommentImageElement).url
+      ? `${(node as BahaCommentImageElement).url} `
+      : ''
   }
 
   return node.children.map((childNode) => serializeNode(childNode)).join('')
@@ -253,6 +255,36 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
     [editor]
   )
 
+  const handlePaste = useCallback<React.ClipboardEventHandler<HTMLDivElement>>(
+    (e) => {
+      const files = e.clipboardData.items
+        ? Array.from(e.clipboardData.items).map((item) =>
+            item.kind === 'file' ? item.getAsFile() : undefined
+          )
+        : e.clipboardData.files
+
+      if (files.length > 0) {
+        e.preventDefault()
+
+        for (let i = 0; i < files.length; i++) {
+          if (!files[i]) {
+            continue
+          }
+          const file = files[i]
+          if (file.type.startsWith('image/')) {
+            Transforms.insertNodes(editor, {
+              type: 'image',
+              children: [{ text: '' }],
+              file,
+            })
+            Transforms.move(editor)
+          }
+        }
+      }
+    },
+    [editor]
+  )
+
   return (
     <div className="space-y-2">
       <div
@@ -266,6 +298,7 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
             renderElement={renderElement}
             onKeyDown={handleKeydown}
             onBlur={handleBlur}
+            onPaste={handlePaste}
             placeholder="輸入回覆..."
             readOnly={isSubmitting || disabled}
           />
