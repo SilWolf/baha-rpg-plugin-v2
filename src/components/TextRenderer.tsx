@@ -1,12 +1,12 @@
 import React from 'react'
 
 const TextRendererImage = ({ url }: { url: string }) => (
-  <a href={url} target="_blank" rel="noreferrer">
+  <a className="inline-block" href={url} target="_blank" rel="noreferrer">
     <img src={url} />
   </a>
 )
 const TextRendererLink = ({ url }: { url: string }) => (
-  <a href={url} target="_blank" rel="noreferrer">
+  <a className="inline" href={url} target="_blank" rel="noreferrer">
     {url}
   </a>
 )
