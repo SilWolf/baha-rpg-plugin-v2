@@ -10,16 +10,27 @@ type UseScroller = {
 }
 
 export const useScroller = (): UseScroller => {
-  const [innerScrollToLast, setInnerScrollToLast] = useState<() => void>(
-    () => () => {
-      console.log('not implement')
-    }
-  )
+  const [innerScrollToLast, setInnerScrollToLast] = useState<() => void>()
   const [autoScrollToLast, setAutoScrollToLast] = useState<boolean>(false)
 
-  const setScrollToLast = useCallback((fn) => {
-    setInnerScrollToLast(() => fn)
-  }, [])
+  const setScrollToLast = useCallback(
+    (fn) => {
+      setInnerScrollToLast(() => fn)
+      if (autoScrollToLast) {
+        fn()
+        setAutoScrollToLast(false)
+      }
+    },
+    [autoScrollToLast]
+  )
+
+  const scrollToLast = useCallback(() => {
+    if (!innerScrollToLast) {
+      setAutoScrollToLast(true)
+      return
+    }
+    innerScrollToLast()
+  }, [innerScrollToLast])
 
   const controller = useMemo(() => {
     return {
