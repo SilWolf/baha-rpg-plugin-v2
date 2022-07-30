@@ -117,10 +117,12 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
             onClick={handleClickRefreshInterval}
             className={refreshIntervalInSecond > 0 ? 'bg-green-400' : ''}
           >
-            <i className="ri-time-line" />
-            {refreshIntervalInSecond > 0
-              ? `自動更新: ${refreshIntervalInSecond}秒`
-              : '自動更新: 關閉'}
+            <i className="bi bi-stopwatch" />{' '}
+            <span>
+              {refreshIntervalInSecond > 0
+                ? `自動更新: ${refreshIntervalInSecond}秒`
+                : '自動更新: 關閉'}
+            </span>
           </button>
         </div>
         <div>
@@ -128,12 +130,19 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
             onClick={handleClickEnableSound}
             className={isEnableSound ? 'bg-green-400' : ''}
           >
-            <i className="ri-time-line" />
+            <i className="bi bi-bell" />{' '}
+            <span>聲音通知: {isEnableSound ? '開啟' : '關閉'}</span>
           </button>
         </div>
         <div>
           <button onClick={handleClickCollapsePost}>
-            <i className="ri-arrow-up-s-fill" />
+            <i
+              className={
+                isCollapsedPost
+                  ? 'bi bi-chevron-expand'
+                  : 'bi bi-chevron-contract'
+              }
+            />
             {isCollapsedPost ? '展開串頭' : '收起串頭'}
           </button>
         </div>

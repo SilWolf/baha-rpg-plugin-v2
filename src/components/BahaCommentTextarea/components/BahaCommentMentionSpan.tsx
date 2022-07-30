@@ -23,7 +23,7 @@ const BahaCommentMentionSpan = (props: RenderElementProps) => {
       contentEditable={false}
       {...props.attributes}
     >
-      <i className="ri-at-line" />
+      <i className="bi bi-at" />
       {(props.element as BahaCommentMentionElement).label}
       {props.children}
     </span>

@@ -58,11 +58,6 @@
 @tailwind components;
 
 @layer components {
-  [class^='ri-'],
-  [class*=' ri-'] {
-    vertical-align: text-bottom;
-  }
-
   .bahaRpgPluginV2App-bahaComment img {
     @apply max-w-full max-h-24;
   }

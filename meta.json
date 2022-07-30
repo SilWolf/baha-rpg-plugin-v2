@@ -6,7 +6,7 @@
     "https://unpkg.com/react-dom@18/umd/react-dom.development.js"
   ],
   "resource": {
-    "REMIXICON": "https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+    "ICON": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
   },
   "include": ["https://guild.gamer.com.tw/post_detail.php*"],
   "grant": ["GM.getValue", "GM.getResourceText", "GM.addStyle"]

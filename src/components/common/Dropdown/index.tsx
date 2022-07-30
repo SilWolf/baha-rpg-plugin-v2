@@ -1,5 +1,5 @@
 import { Menu, Transition } from '@headlessui/react'
-import React from 'react'
+import React, { HTMLAttributes } from 'react'
 import { AnchorHTMLAttributes } from 'react'
 
 type DropdownItem = Omit<
@@ -10,16 +10,16 @@ type DropdownItem = Omit<
   label: React.ReactNode
 }
 
-type Props = {
+type Props = HTMLAttributes<HTMLButtonElement> & {
   itemGroups: DropdownItem[][]
   trigger: React.ReactNode
 }
 
-const Dropdown = ({ trigger, itemGroups }: Props) => {
+const Dropdown = ({ trigger, itemGroups, ...buttonProps }: Props) => {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button>{trigger}</Menu.Button>
+        <Menu.Button {...buttonProps}>{trigger}</Menu.Button>
       </div>
       <Transition
         as={React.Fragment}

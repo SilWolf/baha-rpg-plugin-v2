@@ -16,16 +16,17 @@ const BahaCommentDiv = ({ comment }: Props) => {
           <Avatar src={comment.propic} alt={comment.userid} />
         </div>
         <div className="flex-1">
-          <div className="flex gap-x-4 mb-1">
+          <div className="flex gap-x-4 mb-1 items-center">
             <div className="flex-1 font-bold">{comment.name}</div>
             <div className="text-xs text-gray-400">#{comment.position}</div>
             <div className="text-xs text-gray-400">{comment.ctime}</div>
             <div>
               <Dropdown
-                trigger={<i className="ri-more-2-line" />}
+                trigger={<i className="bi bi-three-dots-vertical" />}
                 itemGroups={[
-                  [{ icon: <i className="ri-edit-line" />, label: '修改' }],
+                  [{ icon: <i className="bi bi-pencil" />, label: '修改' }],
                 ]}
+                className="p-0 bg-transparent text-gray-400"
               />
             </div>
           </div>

@@ -54,7 +54,7 @@ const BahaCommentImageSpan = (props: RenderElementProps) => {
       target="_blank"
       rel="noreferrer"
     >
-      <i className="ri-image-2-line" />
+      <i className="bi bi-image" />
       {!url && !error && <span>上傳圖片中...</span>}
       {url && <span>{url}</span>}
       {error && <span>{error.message}</span>}

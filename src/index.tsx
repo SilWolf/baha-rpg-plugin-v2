@@ -5,10 +5,10 @@ import App from './App'
 
 import 'simplebar-react/dist/simplebar.min.css'
 
-GM.getResourceText('REMIXICON').then((src) => {
+GM.getResourceText('ICON').then((src) => {
   src = src.replace(
-    /remixicon\./g,
-    'https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.'
+    /url\("\./g,
+    'url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font'
   )
   GM.addStyle(src)
 })
