@@ -107,8 +107,7 @@ const useBahaPost = (
 ) => {
   const context = useContext(PostContext)
 
-  const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
-  const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const bahaPost = useMemo(() => context.getPost(gsn, sn), [context, gsn, sn])
   const bahaCommentChunks = useMemo(
@@ -156,35 +155,51 @@ const useBahaPost = (
   )
 
   useEffect(() => {
-    if (gsn && sn) {
-      if (!bahaPost) {
-        setIsLoadingPost(true)
-        getRawPostDetail(gsn, sn)
-          .then((_post) => {
-            context.setPost(gsn, sn, _post)
-          })
-          .finally(() => {
-            setTimeout(() => {
-              setIsLoadingPost(false)
-            }, 0)
-          })
-      }
-
-      if (!bahaCommentChunks) {
-        setIsLoadingComments(true)
-        getRawComments(gsn, sn)
-          .then((_comments) => {
-            const newBahaCommentChunks = []
-            for (let i = 0; i < _comments.length; i += 15)
+    if (gsn && sn && !bahaPost && !bahaCommentChunks) {
+      setIsLoading(true)
+      Promise.all([
+        !bahaPost && getRawPostDetail(gsn, sn),
+        !bahaCommentChunks &&
+          getRawComments(gsn, sn).then((_comments) => {
+            const newBahaCommentChunks: RawBahaComment[][] = []
+            for (let i = 0; i < _comments.length; i += 15) {
               newBahaCommentChunks.push(_comments.slice(i, i + 15))
-            context.setCommentChunks(gsn, sn, newBahaCommentChunks)
-          })
-          .finally(() => {
-            setTimeout(() => {
-              setIsLoadingComments(false)
-            }, 0)
-          })
-      }
+            }
+            return newBahaCommentChunks
+          }),
+        // async () => {
+        //   if (bahaPost) {
+        //     return
+        //   }
+
+        //   return await getRawPostDetail(gsn, sn)
+        // },
+        // async () => {
+        //   if (bahaCommentChunks) {
+        //     return
+        //   }
+
+        //   return await getRawComments(gsn, sn)
+        //   .then((_comments) => {
+        //     const newBahaCommentChunks = []
+        //     for (let i = 0; i < _comments.length; i += 15) {
+        //       newBahaCommentChunks.push(_comments.slice(i, i + 15))}
+        //       return newBahaCommentChunks
+        //   })
+        // },
+      ])
+        .then(([_post, _commentChunks]) => {
+          if (_post) {
+            context.setPost(gsn, sn, _post)
+          }
+          if (_commentChunks) {
+            context.setCommentChunks(gsn, sn, _commentChunks)
+          }
+        })
+        .finally(() => {
+          setIsLoading(false)
+          options?.onSuccessLoadComments()
+        })
     }
   }, [bahaCommentChunks, bahaPost, context, gsn, options, sn])
 
@@ -211,8 +226,7 @@ const useBahaPost = (
   return {
     bahaPost,
     bahaCommentChunks,
-    isLoadingPost,
-    isLoadingComments,
+    isLoading,
     loadLatestComments,
     sendComment,
   }

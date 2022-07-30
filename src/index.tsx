@@ -3,6 +3,8 @@ import React from 'react'
 
 import App from './App'
 
+import 'simplebar-react/dist/simplebar.min.css'
+
 GM.getResourceText('REMIXICON').then((src) => {
   src = src.replace(
     /remixicon\./g,

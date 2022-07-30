@@ -24,6 +24,7 @@ import BahaCommentImageSpan, {
 import BahaCommentMentionSpan, {
   BahaCommentMentionElement,
 } from './components/BahaCommentMentionSpan'
+import Scroller from '../common/Scroller'
 
 type CustomText = { text: string }
 type CustomElement =
@@ -258,9 +259,11 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
   const handlePaste = useCallback<React.ClipboardEventHandler<HTMLDivElement>>(
     (e) => {
       const files = e.clipboardData.items
-        ? Array.from(e.clipboardData.items).map((item) =>
-            item.kind === 'file' ? item.getAsFile() : undefined
-          )
+        ? Array.from(e.clipboardData.items)
+            .map((item) =>
+              item.kind === 'file' ? item.getAsFile() : undefined
+            )
+            .filter((item) => !!item)
         : e.clipboardData.files
 
       if (files.length > 0) {
@@ -293,15 +296,17 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
         onDrop={handleDrop}
       >
         <Slate editor={editor} value={initialValue} onChange={handleChange}>
-          <Editable
-            className="p-4 min-h-[192px]"
-            renderElement={renderElement}
-            onKeyDown={handleKeydown}
-            onBlur={handleBlur}
-            onPaste={handlePaste}
-            placeholder="輸入回覆..."
-            readOnly={isSubmitting || disabled}
-          />
+          <Scroller className="max-h-[10em] overflow-x-hidden">
+            <Editable
+              className="p-4"
+              renderElement={renderElement}
+              onKeyDown={handleKeydown}
+              onBlur={handleBlur}
+              onPaste={handlePaste}
+              placeholder="輸入回覆..."
+              readOnly={isSubmitting || disabled}
+            />
+          </Scroller>
         </Slate>
       </div>
       <div className="text-right">

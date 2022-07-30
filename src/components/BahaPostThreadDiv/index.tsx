@@ -1,8 +1,9 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import useBahaPost from '../../hooks/useBahaPost'
 import BahaCommentDiv from '../BahaCommentDiv'
 import BahaCommentTextarea from '../BahaCommentTextarea'
 import BahaPostDiv from '../BahaPostDiv'
+import Scroller, { useScroller } from '../common/Scroller'
 
 export type BahaPostThreadProps = {
   gsn: string
@@ -13,24 +14,16 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
   const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
     useState<number>(0)
-  const commentsScrollerRef = useRef<HTMLDivElement>()
+  const { controller: scrollerController, scrollToLast: commentsScrollToLast } =
+    useScroller()
 
   const handleSuccessLoadComments = useCallback(() => {
     setTimeout(() => {
-      commentsScrollerRef.current?.scrollTo({
-        top: commentsScrollerRef.current.scrollHeight,
-        behavior: 'smooth',
-      })
-    }, 0)
-  }, [])
+      commentsScrollToLast()
+    }, 10)
+  }, [commentsScrollToLast])
 
-  const {
-    bahaPost,
-    bahaCommentChunks,
-    isLoadingPost,
-    isLoadingComments,
-    sendComment,
-  } = useBahaPost(
+  const { bahaPost, bahaCommentChunks, isLoading, sendComment } = useBahaPost(
     { gsn, sn },
     {
       refreshInterval: refreshIntervalInSecond * 1000,
@@ -72,7 +65,7 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
     })
   }, [])
 
-  if (isLoadingPost || isLoadingComments) {
+  if (isLoading) {
     return <div className="mx-auto max-w-screen-sm">讀取中……</div>
   }
 
@@ -85,7 +78,7 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   }
 
   return (
-    <div className="mx-auto max-w-screen-sm flex flex-col h-full gap-y-4">
+    <div className="mx-auto max-w-screen-sm flex flex-col h-full gap-y-4 min-w-[41em]">
       <div className={isCollapsedPost ? 'hidden' : ''}>
         <BahaPostDiv post={bahaPost} />
       </div>
@@ -111,7 +104,10 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
       </div>
 
       <div className="flex-1 min-h-0">
-        <div className="h-full overflow-y-scroll" ref={commentsScrollerRef}>
+        <Scroller
+          className="h-full overflow-x-hidden"
+          controller={scrollerController}
+        >
           <div className="space-y-2">
             {bahaCommentChunks.map((bahaCommentChunk, chunkI) => (
               <React.Fragment key={chunkI}>
@@ -121,9 +117,9 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
               </React.Fragment>
             ))}
           </div>
-        </div>
+        </Scroller>
       </div>
-      <div>
+      <div className="pl-10">
         <BahaCommentTextarea onSubmit={handleSubmitNewComment} />
       </div>
     </div>

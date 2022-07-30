@@ -66,6 +66,10 @@
   .bahaRpgPluginV2App-bahaComment img {
     @apply max-w-full max-h-24;
   }
+
+  .scrollbar-width-none::-webkit-scrollbar {
+    width: 0;
+  }
 }
 
 @tailwind utilities;
