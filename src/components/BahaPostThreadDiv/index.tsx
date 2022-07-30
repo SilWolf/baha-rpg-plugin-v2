@@ -18,9 +18,7 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
     useScroller()
 
   const handleSuccessLoadComments = useCallback(() => {
-    setTimeout(() => {
-      commentsScrollToLast()
-    }, 10)
+    commentsScrollToLast()
   }, [commentsScrollToLast])
 
   const { bahaPost, bahaCommentChunks, isLoading, sendComment } = useBahaPost(

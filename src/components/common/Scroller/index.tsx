@@ -10,13 +10,14 @@ type UseScroller = {
 }
 
 export const useScroller = (): UseScroller => {
-  const [innerScrollToLast, setInnerScrollToLast] = useState<() => void>()
+  const [innerScrollToLast, setInnerScrollToLast] =
+    useState<() => void | undefined>()
   const [autoScrollToLast, setAutoScrollToLast] = useState<boolean>(false)
 
   const setScrollToLast = useCallback(
     (fn) => {
       setInnerScrollToLast(() => fn)
-      if (autoScrollToLast) {
+      if (fn && autoScrollToLast) {
         fn()
         setAutoScrollToLast(false)
       }
@@ -26,9 +27,11 @@ export const useScroller = (): UseScroller => {
 
   const scrollToLast = useCallback(() => {
     if (!innerScrollToLast) {
+      console.log(2)
       setAutoScrollToLast(true)
       return
     }
+    console.log(5, innerScrollToLast)
     innerScrollToLast()
   }, [innerScrollToLast])
 
@@ -57,16 +60,18 @@ const Scroller = ({ controller, ...props }: Props) => {
 
   useEffect(() => {
     if (controller) {
-      controller.setScrollToLast(() => () => {
+      controller.setScrollToLast(() => {
         const el = sb.current?.getScrollElement()
-        el.scrollTo({
-          top: el.scrollHeight,
-          behavior: 'smooth',
-        })
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior: 'smooth',
+          })
+        }
       })
 
       return () => {
-        controller.setScrollToLast(() => () => {})
+        controller.setScrollToLast(undefined)
       }
     }
   }, [controller])
