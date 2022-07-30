@@ -10,38 +10,45 @@ export type BahaPostThreadProps = {
 }
 
 const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
+  const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
+  const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
+    useState<number>(0)
+  const commentsScrollerRef = useRef<HTMLDivElement>()
+
+  const handleSuccessLoadComments = useCallback(() => {
+    setTimeout(() => {
+      commentsScrollerRef.current?.scrollTo({
+        top: commentsScrollerRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }, 0)
+  }, [])
+
   const {
     bahaPost,
     bahaCommentChunks,
     isLoadingPost,
     isLoadingComments,
     sendComment,
-  } = useBahaPost({ gsn, sn })
-
-  const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
-  const [refreshInterval, setRefreshInterval] = useState<number>(0)
+  } = useBahaPost(
+    { gsn, sn },
+    {
+      refreshInterval: refreshIntervalInSecond * 1000,
+      onSuccessLoadComments: handleSuccessLoadComments,
+    }
+  )
 
   const handleClickCollapsePost = useCallback(() => {
     setIsCollapsedPost((prev) => !prev)
   }, [])
 
   const handleSubmitNewComment = useCallback(
-    (newComment: string) =>
-      sendComment(newComment as string).then(() => {
-        setTimeout(() => {
-          if (commentsScrollerRef.current) {
-            commentsScrollerRef.current.scrollTo({
-              top: commentsScrollerRef.current.scrollHeight,
-              behavior: 'smooth',
-            })
-          }
-        }, 0)
-      }),
+    (newComment: string) => sendComment(newComment as string),
     [sendComment]
   )
 
   const handleClickRefreshInterval = useCallback(() => {
-    setRefreshInterval((prev) => {
+    setRefreshIntervalInSecond((prev) => {
       switch (prev) {
         case 0:
           return 2
@@ -65,8 +72,6 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
     })
   }, [])
 
-  const commentsScrollerRef = useRef<HTMLDivElement>()
-
   if (isLoadingPost || isLoadingComments) {
     return <div className="mx-auto max-w-screen-sm">讀取中……</div>
   }
@@ -87,9 +92,14 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
 
       <div className="flex justify-end gap-x-1">
         <div>
-          <button onClick={handleClickRefreshInterval}>
+          <button
+            onClick={handleClickRefreshInterval}
+            className={refreshIntervalInSecond > 0 ? 'bg-green-400' : ''}
+          >
             <i className="ri-time-line" />
-            {refreshInterval}s
+            {refreshIntervalInSecond > 0
+              ? `自動更新: ${refreshIntervalInSecond}秒`
+              : '自動更新: 關閉'}
           </button>
         </div>
         <div>

@@ -91,25 +91,30 @@ export const PostContextProvider = ({
   return <PostContext.Provider value={value}>{children}</PostContext.Provider>
 }
 
-type UsePostArgs = {
+type UseBahaPostArgs = {
   gsn: string
   sn: string
 }
 
-type UsePostOptions = {
+type UseBahaPostOptions = {
   refreshInterval?: number // in milliseconds
-  onSuccessLoadComments?: () => Promise<unknown>
+  onSuccessLoadComments?: () => void
 }
 
-const usePost = ({ gsn, sn }: UsePostArgs, options?: UsePostOptions) => {
+const useBahaPost = (
+  { gsn, sn }: UseBahaPostArgs,
+  options?: UseBahaPostOptions
+) => {
   const context = useContext(PostContext)
 
-  const [bahaPost, setBahaPost] = useState<RawBahaPost>()
-  const [bahaCommentChunks, setBahaCommentChunks] = useState<
-    RawBahaComment[][]
-  >([])
   const [isLoadingPost, setIsLoadingPost] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
+
+  const bahaPost = useMemo(() => context.getPost(gsn, sn), [context, gsn, sn])
+  const bahaCommentChunks = useMemo(
+    () => context.getCommentChunks(gsn, sn),
+    [context, gsn, sn]
+  )
 
   const loadLatestComments = useCallback(async () => {
     const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
@@ -132,7 +137,6 @@ const usePost = ({ gsn, sn }: UsePostArgs, options?: UsePostOptions) => {
         nextChunkIndex--
       }
 
-      setBahaCommentChunks(newBahaCommentChunks)
       context.setCommentChunks(gsn, sn, newBahaCommentChunks)
       options?.onSuccessLoadComments?.()
     }
@@ -153,40 +157,36 @@ const usePost = ({ gsn, sn }: UsePostArgs, options?: UsePostOptions) => {
 
   useEffect(() => {
     if (gsn && sn) {
-      const storedPost = context.getPost(gsn, sn)
-      if (storedPost) {
-        setBahaPost(storedPost)
-      } else {
+      if (!bahaPost) {
         setIsLoadingPost(true)
         getRawPostDetail(gsn, sn)
           .then((_post) => {
-            setBahaPost(_post)
             context.setPost(gsn, sn, _post)
           })
           .finally(() => {
-            setIsLoadingPost(false)
+            setTimeout(() => {
+              setIsLoadingPost(false)
+            }, 0)
           })
       }
 
-      const storedCommentChunks = context.getCommentChunks(gsn, sn)
-      if (storedCommentChunks) {
-        setBahaCommentChunks(storedCommentChunks)
-      } else {
+      if (!bahaCommentChunks) {
         setIsLoadingComments(true)
         getRawComments(gsn, sn)
           .then((_comments) => {
             const newBahaCommentChunks = []
             for (let i = 0; i < _comments.length; i += 15)
               newBahaCommentChunks.push(_comments.slice(i, i + 15))
-            setBahaCommentChunks(newBahaCommentChunks)
             context.setCommentChunks(gsn, sn, newBahaCommentChunks)
           })
           .finally(() => {
-            setIsLoadingComments(false)
+            setTimeout(() => {
+              setIsLoadingComments(false)
+            }, 0)
           })
       }
     }
-  }, [context, gsn, sn])
+  }, [bahaCommentChunks, bahaPost, context, gsn, options, sn])
 
   useEffect(() => {
     if (
@@ -218,4 +218,4 @@ const usePost = ({ gsn, sn }: UsePostArgs, options?: UsePostOptions) => {
   }
 }
 
-export default usePost
+export default useBahaPost
