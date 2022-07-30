@@ -46,22 +46,23 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
     }, 0)
   }, [commentsScrollToLast, isEnableSound])
 
-  const { bahaPost, bahaCommentChunks, isLoading, sendComment } = useBahaPost(
-    { gsn, sn },
-    {
-      refreshInterval: refreshIntervalInSecond * 1000,
-      onSuccess: handleSuccessLoad,
-      onSuccessLoadComments: handleSuccessLoadComments,
-    }
-  )
+  const { bahaPost, bahaCommentChunks, isLoading, createComment, editComment } =
+    useBahaPost(
+      { gsn, sn },
+      {
+        refreshInterval: refreshIntervalInSecond * 1000,
+        onSuccess: handleSuccessLoad,
+        onSuccessLoadComments: handleSuccessLoadComments,
+      }
+    )
 
   const handleClickCollapsePost = useCallback(() => {
     setIsCollapsedPost((prev) => !prev)
   }, [])
 
   const handleSubmitNewComment = useCallback(
-    (newComment: string) => sendComment(newComment as string),
-    [sendComment]
+    (newComment: string) => createComment(newComment as string),
+    [createComment]
   )
 
   const handleClickRefreshInterval = useCallback(() => {
@@ -92,6 +93,13 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
   const handleClickEnableSound = useCallback(() => {
     setIsEnableSound((prev) => !prev)
   }, [])
+
+  const handleEditComment = useCallback(
+    (commentId: string, content: string) => {
+      return editComment(commentId, content)
+    },
+    [editComment]
+  )
 
   if (isLoading) {
     return <div className="mx-auto max-w-screen-sm">讀取中……</div>
@@ -157,7 +165,11 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
             {bahaCommentChunks.map((bahaCommentChunk, chunkI) => (
               <React.Fragment key={chunkI}>
                 {bahaCommentChunk.map((bahaComment) => (
-                  <BahaCommentDiv key={bahaComment.id} comment={bahaComment} />
+                  <BahaCommentDiv
+                    key={bahaComment.id}
+                    comment={bahaComment}
+                    onEdit={handleEditComment}
+                  />
                 ))}
               </React.Fragment>
             ))}

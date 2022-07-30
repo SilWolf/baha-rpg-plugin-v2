@@ -64,7 +64,7 @@ export const getRawComments = (
   )
 }
 
-export const postComment = (payload: {
+export const apiCreateComment = (payload: {
   gsn: string
   sn: string
   content: string
@@ -83,6 +83,34 @@ export const postComment = (payload: {
   formData.append('legacy', '1')
 
   return fetch(`https://api.gamer.com.tw/guild/v1/comment_new.php`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: new Headers({ 'X-Bahamut-Csrf-Token': token }),
+    body: formData,
+  })
+}
+
+export const apiEditComment = (payload: {
+  gsn: string
+  sn: string
+  commentId: string
+  content: string
+}) => {
+  const token = generateToken()
+  Cookies.set('ckBahamutCsrfToken', token, {
+    domain: '.gamer.com.tw',
+    path: '/',
+    secure: true,
+  })
+
+  const formData = new FormData()
+  formData.append('gsn', payload.gsn)
+  formData.append('messageId', payload.sn)
+  formData.append('commentId', payload.commentId)
+  formData.append('content', payload.content)
+  formData.append('legacy', '1')
+
+  return fetch(`https://api.gamer.com.tw/guild/v1/comment_edit.php`, {
     method: 'POST',
     credentials: 'include',
     headers: new Headers({ 'X-Bahamut-Csrf-Token': token }),

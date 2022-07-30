@@ -9,7 +9,8 @@ import {
   getRawCommentChunkWithPagination,
   getRawComments,
   getRawPostDetail,
-  postComment,
+  apiCreateComment,
+  apiEditComment,
 } from '../services/api.service'
 import { RawBahaComment } from '../types/bahaComment.type'
 import { RawBahaPost } from '../types/bahaPost.type'
@@ -144,11 +145,25 @@ const useBahaPost = (
     context.setCommentChunks(gsn, sn, newBahaCommentChunks)
   }, [bahaCommentChunks, context, gsn, options, sn])
 
-  const sendComment = useCallback(
+  const createComment = useCallback(
     (content: string) => {
-      return postComment({
+      return apiCreateComment({
         gsn,
         sn,
+        content,
+      }).then(() => {
+        return loadLatestComments()
+      })
+    },
+    [gsn, loadLatestComments, sn]
+  )
+
+  const editComment = useCallback(
+    (commentId: string, content: string) => {
+      return apiEditComment({
+        gsn,
+        sn,
+        commentId,
         content,
       }).then(() => {
         return loadLatestComments()
@@ -170,26 +185,6 @@ const useBahaPost = (
             }
             return newBahaCommentChunks
           }),
-        // async () => {
-        //   if (bahaPost) {
-        //     return
-        //   }
-
-        //   return await getRawPostDetail(gsn, sn)
-        // },
-        // async () => {
-        //   if (bahaCommentChunks) {
-        //     return
-        //   }
-
-        //   return await getRawComments(gsn, sn)
-        //   .then((_comments) => {
-        //     const newBahaCommentChunks = []
-        //     for (let i = 0; i < _comments.length; i += 15) {
-        //       newBahaCommentChunks.push(_comments.slice(i, i + 15))}
-        //       return newBahaCommentChunks
-        //   })
-        // },
       ])
         .then(([_post, _commentChunks]) => {
           if (_post) {
@@ -231,7 +226,8 @@ const useBahaPost = (
     bahaCommentChunks,
     isLoading,
     loadLatestComments,
-    sendComment,
+    createComment,
+    editComment,
   }
 }
 

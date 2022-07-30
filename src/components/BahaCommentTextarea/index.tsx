@@ -83,12 +83,18 @@ const serializeNode = (node: Node) => {
 }
 
 type Props = {
+  onCancel?: () => void
   onSubmit?: (value: string) => Promise<unknown>
   value?: string
   disabled?: boolean
 }
 
-const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
+const BahaCommentTextarea = ({
+  onCancel,
+  onSubmit,
+  value,
+  disabled,
+}: Props) => {
   const [editor] = useState(() =>
     withCustom(withReact(withHistory(createEditor())))
   )
@@ -309,13 +315,16 @@ const BahaCommentEditor = ({ onSubmit, value, disabled }: Props) => {
           </Scroller>
         </Slate>
       </div>
-      <div className="text-right">
-        <button disabled={isSubmitting || disabled} onClick={handleSubmit}>
-          提交
-        </button>
+      <div className="text-right space-x-2">
+        {onCancel && <button onClick={onCancel}>取消</button>}
+        {onSubmit && (
+          <button disabled={isSubmitting || disabled} onClick={handleSubmit}>
+            提交
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
-export default BahaCommentEditor
+export default BahaCommentTextarea
