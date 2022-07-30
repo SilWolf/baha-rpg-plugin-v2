@@ -4,47 +4,56 @@ import SimpleBar from 'simplebar-react'
 
 type UseScroller = {
   controller: {
-    setScrollToLast: Dispatch<SetStateAction<() => void>>
+    setElement: Dispatch<SetStateAction<HTMLElement>>
   }
   scrollToLast: () => void
+  getIsAtLast: () => boolean
 }
 
 export const useScroller = (): UseScroller => {
-  const [innerScrollToLast, setInnerScrollToLast] =
-    useState<() => void | undefined>()
+  const [element, setElement] = useState<HTMLElement>()
   const [autoScrollToLast, setAutoScrollToLast] = useState<boolean>(false)
 
-  const setScrollToLast = useCallback(
-    (fn) => {
-      setInnerScrollToLast(() => fn)
-      if (fn && autoScrollToLast) {
-        fn()
-        setAutoScrollToLast(false)
-      }
-    },
-    [autoScrollToLast]
-  )
-
   const scrollToLast = useCallback(() => {
-    if (!innerScrollToLast) {
+    if (!element) {
       setAutoScrollToLast(true)
       return
     }
-    innerScrollToLast()
-  }, [innerScrollToLast])
+
+    element.scrollTo({
+      top: element.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, [element])
+
+  const getIsAtLast = useCallback((): boolean => {
+    if (element) {
+      return false
+    }
+
+    return element.scrollHeight - element.scrollTop < 50
+  }, [element])
 
   const controller = useMemo(() => {
     return {
-      setScrollToLast,
+      setElement,
     }
-  }, [setScrollToLast])
+  }, [setElement])
 
   const value = useMemo(() => {
     return {
       controller,
       scrollToLast,
+      getIsAtLast,
     }
-  }, [controller, scrollToLast])
+  }, [controller, scrollToLast, getIsAtLast])
+
+  useEffect(() => {
+    if (element && autoScrollToLast) {
+      setAutoScrollToLast(false)
+      scrollToLast()
+    }
+  }, [autoScrollToLast, element, scrollToLast])
 
   return value
 }
@@ -58,18 +67,13 @@ const Scroller = ({ controller, ...props }: Props) => {
 
   useEffect(() => {
     if (controller) {
-      controller.setScrollToLast(() => {
-        const el = sb.current?.getScrollElement()
-        if (el) {
-          el.scrollTo({
-            top: el.scrollHeight,
-            behavior: 'smooth',
-          })
-        }
-      })
+      const el = sb.current?.getScrollElement()
+      if (el) {
+        controller.setElement(el)
+      }
 
       return () => {
-        controller.setScrollToLast(undefined)
+        controller.setElement(undefined)
       }
     }
   }, [controller])

@@ -5,19 +5,29 @@ import BahaCommentTextarea from '../BahaCommentTextarea'
 import BahaPostDiv from '../BahaPostDiv'
 import Scroller, { useScroller } from '../common/Scroller'
 
+export type BahaPostThreadOptions = {
+  refreshIntervalInSecond?: number
+  sound?: boolean
+}
+
 export type BahaPostThreadProps = {
   gsn: string
   sn: string
+  options?: BahaPostThreadOptions
 }
 
 const notifyAudio = new Audio(
   'https://github.com/SilWolf/bahamut-guild-v2-toolkit/blob/main/src/plugins/bhgv2-auto-refresh/notify_2.mp3?raw=true'
 )
 
-const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
+const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
   const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
-    useState<number>(0)
+    useState<number>(options?.refreshIntervalInSecond ?? 0)
+  const [isEnableSound, setIsEnableSound] = useState<boolean>(
+    options?.sound ?? true
+  )
+
   const { controller: scrollerController, scrollToLast: commentsScrollToLast } =
     useScroller()
 
@@ -30,9 +40,11 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   const handleSuccessLoadComments = useCallback(() => {
     setTimeout(() => {
       commentsScrollToLast()
-      notifyAudio.play()
+      if (isEnableSound) {
+        notifyAudio.play()
+      }
     }, 0)
-  }, [commentsScrollToLast])
+  }, [commentsScrollToLast, isEnableSound])
 
   const { bahaPost, bahaCommentChunks, isLoading, sendComment } = useBahaPost(
     { gsn, sn },
@@ -77,6 +89,10 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
     })
   }, [])
 
+  const handleClickEnableSound = useCallback(() => {
+    setIsEnableSound((prev) => !prev)
+  }, [])
+
   if (isLoading) {
     return <div className="mx-auto max-w-screen-sm">讀取中……</div>
   }
@@ -90,7 +106,7 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   }
 
   return (
-    <div className="mx-auto max-w-screen-sm flex flex-col h-full gap-y-4 min-w-[41em]">
+    <div className="mx-auto flex flex-col h-full gap-y-4 w-[41em]">
       <div className={isCollapsedPost ? 'hidden' : ''}>
         <BahaPostDiv post={bahaPost} />
       </div>
@@ -105,6 +121,14 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
             {refreshIntervalInSecond > 0
               ? `自動更新: ${refreshIntervalInSecond}秒`
               : '自動更新: 關閉'}
+          </button>
+        </div>
+        <div>
+          <button
+            onClick={handleClickEnableSound}
+            className={isEnableSound ? 'bg-green-400' : ''}
+          >
+            <i className="ri-time-line" />
           </button>
         </div>
         <div>
