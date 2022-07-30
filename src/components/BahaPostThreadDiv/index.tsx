@@ -10,6 +10,10 @@ export type BahaPostThreadProps = {
   sn: string
 }
 
+const notifyAudio = new Audio(
+  'https://github.com/SilWolf/bahamut-guild-v2-toolkit/blob/main/src/plugins/bhgv2-auto-refresh/notify_2.mp3?raw=true'
+)
+
 const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
   const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
@@ -17,14 +21,24 @@ const BahaPostThreadDiv = ({ gsn, sn }: BahaPostThreadProps) => {
   const { controller: scrollerController, scrollToLast: commentsScrollToLast } =
     useScroller()
 
+  const handleSuccessLoad = useCallback(() => {
+    setTimeout(() => {
+      commentsScrollToLast()
+    }, 0)
+  }, [commentsScrollToLast])
+
   const handleSuccessLoadComments = useCallback(() => {
-    commentsScrollToLast()
+    setTimeout(() => {
+      commentsScrollToLast()
+      notifyAudio.play()
+    }, 0)
   }, [commentsScrollToLast])
 
   const { bahaPost, bahaCommentChunks, isLoading, sendComment } = useBahaPost(
     { gsn, sn },
     {
       refreshInterval: refreshIntervalInSecond * 1000,
+      onSuccess: handleSuccessLoad,
       onSuccessLoadComments: handleSuccessLoadComments,
     }
   )

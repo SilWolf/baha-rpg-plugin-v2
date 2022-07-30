@@ -98,6 +98,7 @@ type UseBahaPostArgs = {
 
 type UseBahaPostOptions = {
   refreshInterval?: number // in milliseconds
+  onSuccess?: () => void
   onSuccessLoadComments?: () => void
 }
 
@@ -118,10 +119,16 @@ const useBahaPost = (
   const loadLatestComments = useCallback(async () => {
     const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
       await getRawCommentChunkWithPagination(gsn, sn)
+    console.log(
+      bahaCommentChunks[currentChunkIndex],
+      bahaCommentChunks[currentChunkIndex].length,
+      rawCommentChunk.length
+    )
     if (
       !bahaCommentChunks[currentChunkIndex] ||
       bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length
     ) {
+      console.log('1')
       const newBahaCommentChunks = [...bahaCommentChunks]
       newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
 
@@ -198,7 +205,7 @@ const useBahaPost = (
         })
         .finally(() => {
           setIsLoading(false)
-          options?.onSuccessLoadComments()
+          options?.onSuccess()
         })
     }
   }, [bahaCommentChunks, bahaPost, context, gsn, options, sn])

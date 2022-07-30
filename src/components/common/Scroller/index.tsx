@@ -27,11 +27,9 @@ export const useScroller = (): UseScroller => {
 
   const scrollToLast = useCallback(() => {
     if (!innerScrollToLast) {
-      console.log(2)
       setAutoScrollToLast(true)
       return
     }
-    console.log(5, innerScrollToLast)
     innerScrollToLast()
   }, [innerScrollToLast])
 
