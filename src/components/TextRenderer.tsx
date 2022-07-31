@@ -1,4 +1,5 @@
 import React from 'react'
+import { parseCommentToItems } from '../utils/bahaComment.util'
 
 const TextRendererMention = ({ label }: { label: string }) => (
   <a className="inline-block" href="#" target="_blank" rel="noreferrer">
@@ -11,75 +12,29 @@ const TextRendererImage = ({ url }: { url: string }) => (
     <img src={url} />
   </a>
 )
-const TextRendererLink = ({ url }: { url: string }) => (
+const TextRendererUrl = ({ url }: { url: string }) => (
   <a className="inline" href={url} target="_blank" rel="noreferrer">
     {url}
   </a>
 )
 
 const TextRenderer = ({ children }: { children: string }) => {
-  const lines = children.split('\n').map((line) => {
-    const items: React.ReactNode[] = [line]
-
-    let i = 0
-    while (i < items.length) {
-      let item = items[i]
-      let match: RegExpMatchArray
-      let hasUpdated = false
-
+  const lines = parseCommentToItems(children).map((line) =>
+    line.map((item) => {
       if (typeof item === 'string') {
-        match = item.match(/!?\[([^\]]*)\]\(([^)]+)\)/)
-        if (match) {
-          const url = match[2] as string
-          const component =
-            match[0][0] === '!' ? (
-              <TextRendererImage key={i} url={url} />
-            ) : (
-              <TextRendererLink key={i} url={url} />
-            )
-
-          items[i] = item.substring(0, match.index)
-
-          items.splice(
-            i + 1,
-            0,
-            component,
-            item.substring(match.index + match[0].length)
-          )
-
-          item = item[i]
-          hasUpdated = true
-        }
+        return item
       }
 
-      if (typeof item === 'string') {
-        match = item.match(/\[(\w+)\:([^\]]+)\]/)
-        if (match) {
-          // const id = match[1] as string
-          const label = match[2] as string
-          const component = <TextRendererMention label={label} />
-
-          items[i] = item.substring(0, match.index)
-
-          items.splice(
-            i + 1,
-            0,
-            component,
-            item.substring(match.index + match[0].length)
-          )
-
-          item = item[i]
-          hasUpdated = true
-        }
+      switch (item.type) {
+        case 'mention':
+          return <TextRendererMention label={item.label} />
+        case 'url':
+          return <TextRendererUrl url={item.url} />
+        case 'image':
+          return <TextRendererImage url={item.url} />
       }
-
-      if (!hasUpdated) {
-        i++
-      }
-    }
-
-    return items
-  })
+    })
+  )
 
   return (
     <p>

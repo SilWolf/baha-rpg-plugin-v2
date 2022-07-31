@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   createEditor,
   BaseEditor,
@@ -25,12 +25,19 @@ import BahaCommentMentionSpan, {
   BahaCommentMentionElement,
 } from './components/BahaCommentMentionSpan'
 import Scroller from '../common/Scroller'
+import { parseCommentToItems } from '../../utils/bahaComment.util'
+import { BahaCommentUrlElement } from './components/BahaCommentUrlSpan'
 
 type CustomText = { text: string }
-type CustomElement =
-  | { type: 'paragraph'; children: CustomText[] }
+type CustomChildElement =
   | BahaCommentMentionElement
   | BahaCommentImageElement
+  | BahaCommentUrlElement
+type CustomParagraphElement = {
+  type: 'paragraph'
+  children: (CustomText | CustomChildElement)[]
+}
+type CustomElement = CustomParagraphElement | CustomChildElement
 
 declare module 'slate' {
   // eslint-disable-next-line no-unused-vars
@@ -80,19 +87,6 @@ const serializeNode = (node: Node) => {
   }
 
   return node.children.map((childNode) => serializeNode(childNode)).join('')
-}
-
-const deserializeString = (value: string) => {
-  const elements: CustomElement[] = value.split('\n').map((line) => ({
-    type: 'paragraph',
-    children: [
-      {
-        text: line,
-      },
-    ],
-  }))
-
-  return elements
 }
 
 type Props = {
@@ -170,6 +164,7 @@ const BahaCommentTextarea = ({
   }, [editor])
 
   const handleSubmit = useCallback(() => {
+    console.log(editor.children)
     if (onSubmit) {
       const text = editor.children.map((node) => serializeNode(node)).join('\n')
       setIsSubmitting(true)
@@ -306,6 +301,54 @@ const BahaCommentTextarea = ({
     },
     [editor]
   )
+
+  useEffect(() => {
+    if (value && editor) {
+      const elements: CustomParagraphElement[] = parseCommentToItems(value).map(
+        (line) => ({
+          type: 'paragraph',
+          children: line.map((item) => {
+            if (typeof item !== 'string') {
+              switch (item.type) {
+                case 'mention':
+                  return {
+                    type: 'mention',
+                    label: item.label,
+                    children: [{ text: '' }],
+                  }
+                case 'url':
+                  return {
+                    type: 'url',
+                    url: item.url,
+                    children: [{ text: '' }],
+                  }
+                case 'image':
+                  return {
+                    type: 'image',
+                    url: item.url,
+                    children: [{ text: '' }],
+                  }
+              }
+            }
+
+            return {
+              text: item,
+            }
+          }),
+        })
+      )
+
+      Transforms.insertNodes(editor, elements, {
+        at: {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, []),
+        },
+      })
+      Transforms.removeNodes(editor, {
+        at: ReactEditor.findPath(editor, editor.children[0]),
+      })
+    }
+  }, [editor, value])
 
   return (
     <div className="space-y-2">
