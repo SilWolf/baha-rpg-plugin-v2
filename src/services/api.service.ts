@@ -3,6 +3,7 @@ import {
   RawBahaCommentWithPagination,
 } from '../types/bahaComment.type'
 import { RawBahaPost } from '../types/bahaPost.type'
+import { decodeHTML } from '../utils/string.util'
 
 declare const Cookies
 
@@ -17,6 +18,33 @@ const generateToken = () => {
   }
 
   return token
+}
+
+const formatComment = (comment: RawBahaComment): RawBahaComment => {
+  let newText = comment.text
+
+  if (comment.mentions && comment.mentions.length > 0) {
+    const sortedMentions = comment.mentions.sort(
+      (a, b) => parseInt(b.offset) - parseInt(a.offset)
+    )
+
+    for (const sortedMention of sortedMentions) {
+      const offset = parseInt(sortedMention.offset)
+      const length = parseInt(sortedMention.length)
+
+      newText =
+        newText.substring(0, offset) +
+        `[${sortedMention.id}:${newText.substring(offset, offset + length)}]` +
+        newText.substring(offset + length)
+    }
+  }
+
+  newText = decodeHTML(newText)
+
+  return {
+    ...comment,
+    text: newText,
+  }
 }
 
 export const getRawPostDetail = (
@@ -49,10 +77,10 @@ export const getRawCommentChunkWithPagination = (
   )
 }
 
-export const getRawComments = (
+export const getRawCommentChunks = (
   gsn: string | number,
   sn: string | number
-): Promise<RawBahaComment[]> => {
+): Promise<RawBahaComment[][]> => {
   return fetch(
     `https://api.gamer.com.tw/guild/v1/comment_list.php?gsn=${gsn}&messageId=${sn}&all`,
     {
@@ -60,7 +88,17 @@ export const getRawComments = (
     }
   ).then(
     (res) =>
-      res.json().then((json) => json.data.comments) as Promise<RawBahaComment[]>
+      res.json().then((json) => {
+        const comments = json.data.comments
+
+        const newBahaCommentChunks: RawBahaComment[][] = []
+        for (let i = 0; i < comments.length; i += 15) {
+          newBahaCommentChunks.push(
+            comments.slice(i, i + 15).map((comment) => formatComment(comment))
+          )
+        }
+        return newBahaCommentChunks
+      }) as Promise<RawBahaComment[][]>
   )
 }
 

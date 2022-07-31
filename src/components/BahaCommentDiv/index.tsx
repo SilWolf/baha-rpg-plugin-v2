@@ -61,7 +61,7 @@ const BahaCommentDiv = ({ comment, onEdit }: Props) => {
   return (
     <div className="bahaRpgPluginV2App-bahaComment shadow p-4">
       <div className="flex gap-x-2">
-        <div>
+        <div className="flex-[0_0_2rem]">
           <Avatar src={comment.propic} alt={comment.userid} />
         </div>
         <div className="flex-1">
@@ -77,7 +77,7 @@ const BahaCommentDiv = ({ comment, onEdit }: Props) => {
               />
             </div>
           </div>
-          <div>
+          <div className="break-all">
             <TextRenderer>{comment.text}</TextRenderer>
           </div>
         </div>

@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import {
   getRawCommentChunkWithPagination,
-  getRawComments,
+  getRawCommentChunks,
   getRawPostDetail,
   apiCreateComment,
   apiEditComment,
@@ -177,14 +177,7 @@ const useBahaPost = (
       setIsLoading(true)
       Promise.all([
         !bahaPost && getRawPostDetail(gsn, sn),
-        !bahaCommentChunks &&
-          getRawComments(gsn, sn).then((_comments) => {
-            const newBahaCommentChunks: RawBahaComment[][] = []
-            for (let i = 0; i < _comments.length; i += 15) {
-              newBahaCommentChunks.push(_comments.slice(i, i + 15))
-            }
-            return newBahaCommentChunks
-          }),
+        !bahaCommentChunks && getRawCommentChunks(gsn, sn),
       ])
         .then(([_post, _commentChunks]) => {
           if (_post) {

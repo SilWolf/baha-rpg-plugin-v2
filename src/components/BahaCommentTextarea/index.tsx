@@ -46,7 +46,7 @@ const DefaultElement = (props: RenderElementProps) => {
 }
 
 // Import the Slate components and React plugin.
-const initialValue: any[] = [
+const initialValue: CustomElement[] = [
   {
     type: 'paragraph',
     children: [{ text: '' }],
@@ -80,6 +80,19 @@ const serializeNode = (node: Node) => {
   }
 
   return node.children.map((childNode) => serializeNode(childNode)).join('')
+}
+
+const deserializeString = (value: string) => {
+  const elements: CustomElement[] = value.split('\n').map((line) => ({
+    type: 'paragraph',
+    children: [
+      {
+        text: line,
+      },
+    ],
+  }))
+
+  return elements
 }
 
 type Props = {

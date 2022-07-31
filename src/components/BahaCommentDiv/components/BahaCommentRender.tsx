@@ -1,23 +1,22 @@
 import React from 'react'
 
-const TextRendererMention = ({ label }: { label: string }) => (
+const BahaCommentRenderMention = ({ label }: { label: string }) => (
   <a className="inline-block" href="#" target="_blank" rel="noreferrer">
     {label}
   </a>
 )
-
-const TextRendererImage = ({ url }: { url: string }) => (
+const BahaCommentRenderImage = ({ url }: { url: string }) => (
   <a className="inline-block" href={url} target="_blank" rel="noreferrer">
     <img src={url} />
   </a>
 )
-const TextRendererLink = ({ url }: { url: string }) => (
+const BahaCommentRenderLink = ({ url }: { url: string }) => (
   <a className="inline" href={url} target="_blank" rel="noreferrer">
     {url}
   </a>
 )
 
-const TextRenderer = ({ children }: { children: string }) => {
+const BahaCommentRender = ({ children }: { children: string }) => {
   const lines = children.split('\n').map((line) => {
     const items: React.ReactNode[] = [line]
 
@@ -33,9 +32,9 @@ const TextRenderer = ({ children }: { children: string }) => {
           const url = match[2] as string
           const component =
             match[0][0] === '!' ? (
-              <TextRendererImage key={i} url={url} />
+              <BahaCommentRenderImage key={i} url={url} />
             ) : (
-              <TextRendererLink key={i} url={url} />
+              <BahaCommentRenderLink key={i} url={url} />
             )
 
           items[i] = item.substring(0, match.index)
@@ -57,7 +56,7 @@ const TextRenderer = ({ children }: { children: string }) => {
         if (match) {
           // const id = match[1] as string
           const label = match[2] as string
-          const component = <TextRendererMention label={label} />
+          const component = <BahaCommentRenderMention label={label} />
 
           items[i] = item.substring(0, match.index)
 
@@ -93,4 +92,4 @@ const TextRenderer = ({ children }: { children: string }) => {
   )
 }
 
-export default React.memo(TextRenderer)
+export default React.memo(BahaCommentRender)

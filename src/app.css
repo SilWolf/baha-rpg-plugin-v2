@@ -53,6 +53,10 @@
     border-style: solid;
     border-color: theme('borderColor.DEFAULT', currentColor);
   }
+
+  a {
+    @apply text-teal-600;
+  }
 }
 
 @tailwind components;
