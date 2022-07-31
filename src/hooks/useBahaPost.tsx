@@ -97,10 +97,14 @@ type UseBahaPostArgs = {
   sn: string
 }
 
+type OnSuccessLoadCommentsExtraPayload = {
+  muted?: boolean
+}
+
 type UseBahaPostOptions = {
   refreshInterval?: number // in milliseconds
   onSuccess?: () => void
-  onSuccessLoadComments?: () => void
+  onSuccessLoadComments?: (payload?: OnSuccessLoadCommentsExtraPayload) => void
 }
 
 const useBahaPost = (
@@ -117,33 +121,36 @@ const useBahaPost = (
     [context, gsn, sn]
   )
 
-  const loadLatestComments = useCallback(async () => {
-    const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
-      await getRawCommentChunkWithPagination(gsn, sn)
+  const loadLatestComments = useCallback(
+    async (payload?: OnSuccessLoadCommentsExtraPayload) => {
+      const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
+        await getRawCommentChunkWithPagination(gsn, sn)
 
-    const newBahaCommentChunks = [...bahaCommentChunks]
-    newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
+      const newBahaCommentChunks = [...bahaCommentChunks]
+      newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
 
-    if (
-      !bahaCommentChunks[currentChunkIndex] ||
-      bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length
-    ) {
-      let nextChunkIndex = currentChunkIndex - 1
-      while (nextChunkIndex > 0 && currentChunkIndex - nextChunkIndex > 1) {
-        newBahaCommentChunks[nextChunkIndex] =
-          await getRawCommentChunkWithPagination(
-            gsn,
-            sn,
-            nextChunkIndex + 1
-          ).then((res) => res.comments)
-        nextChunkIndex--
+      if (
+        !bahaCommentChunks[currentChunkIndex] ||
+        bahaCommentChunks[currentChunkIndex].length !== rawCommentChunk.length
+      ) {
+        let nextChunkIndex = currentChunkIndex - 1
+        while (nextChunkIndex > 0 && currentChunkIndex - nextChunkIndex > 1) {
+          newBahaCommentChunks[nextChunkIndex] =
+            await getRawCommentChunkWithPagination(
+              gsn,
+              sn,
+              nextChunkIndex + 1
+            ).then((res) => res.comments)
+          nextChunkIndex--
+        }
+
+        options?.onSuccessLoadComments?.(payload)
       }
 
-      options?.onSuccessLoadComments?.()
-    }
-
-    context.setCommentChunks(gsn, sn, newBahaCommentChunks)
-  }, [bahaCommentChunks, context, gsn, options, sn])
+      context.setCommentChunks(gsn, sn, newBahaCommentChunks)
+    },
+    [bahaCommentChunks, context, gsn, options, sn]
+  )
 
   const createComment = useCallback(
     (content: string) => {
@@ -152,7 +159,7 @@ const useBahaPost = (
         sn,
         content,
       }).then(() => {
-        return loadLatestComments()
+        return loadLatestComments({ muted: true })
       })
     },
     [gsn, loadLatestComments, sn]

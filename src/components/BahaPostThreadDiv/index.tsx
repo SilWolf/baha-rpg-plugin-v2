@@ -37,14 +37,17 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
     }, 0)
   }, [commentsScrollToLast])
 
-  const handleSuccessLoadComments = useCallback(() => {
-    setTimeout(() => {
-      commentsScrollToLast()
-      if (isEnableSound) {
-        notifyAudio.play()
-      }
-    }, 0)
-  }, [commentsScrollToLast, isEnableSound])
+  const handleSuccessLoadComments = useCallback(
+    ({ muted }) => {
+      setTimeout(() => {
+        commentsScrollToLast()
+        if (isEnableSound && !muted) {
+          notifyAudio.play()
+        }
+      }, 0)
+    },
+    [commentsScrollToLast, isEnableSound]
+  )
 
   const { bahaPost, bahaCommentChunks, isLoading, createComment, editComment } =
     useBahaPost(
