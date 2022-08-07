@@ -4,13 +4,6 @@ export type RawBahaCommentMention = {
   length: string
 }
 
-export type RawBahaCommentWithPagination = {
-  comments: RawBahaComment[]
-  nextPage: number
-  totalPage: number
-  commentCount: number
-}
-
 export type RawBahaComment = {
   ctime: string
   time: string
@@ -23,8 +16,23 @@ export type RawBahaComment = {
   userid: string
 }
 
+export type RawBahaCommentWithPagination = {
+  comments: RawBahaComment[]
+  nextPage: number
+  totalPage: number
+  commentCount: number
+}
+
 export type BahaComment = Omit<RawBahaComment, 'name' | 'userid'> & {
   authorId: string
   authorName: string
-  plainText: string
+  rawText: string
+  mentionedUserIdSet: Set<string>
+}
+
+export type BahaCommentWithPagination = Omit<
+  RawBahaCommentWithPagination,
+  'comments'
+> & {
+  comments: BahaComment[]
 }

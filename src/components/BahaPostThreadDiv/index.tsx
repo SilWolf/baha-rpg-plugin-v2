@@ -1,11 +1,18 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import useBahaPost from '../../hooks/useBahaPost'
 import BahaCommentDiv from '../BahaCommentDiv'
 import BahaCommentTextarea from '../BahaCommentTextarea'
 import BahaPostDiv from '../BahaPostDiv'
 import Scroller, { useScroller } from '../common/Scroller'
 
+export type BahaPostThreadFilter = {
+  fromUserIds?: string[]
+  toUserIds?: string[]
+}
+
 export type BahaPostThreadOptions = {
+  hidePost?: boolean
+  filter?: BahaPostThreadFilter
   refreshIntervalInSecond?: number
   sound?: boolean
 }
@@ -13,6 +20,12 @@ export type BahaPostThreadOptions = {
 export type BahaPostThreadProps = {
   gsn: string
   sn: string
+  isSlave?: boolean
+  onCreateNewThreadByOtherPlayer?: (
+    gsn: string,
+    sn: string,
+    filter: BahaPostThreadFilter
+  ) => Promise<unknown>
   options?: BahaPostThreadOptions
 }
 
@@ -20,7 +33,12 @@ const notifyAudio = new Audio(
   'https://github.com/SilWolf/bahamut-guild-v2-toolkit/blob/main/src/plugins/bhgv2-auto-refresh/notify_2.mp3?raw=true'
 )
 
-const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
+const BahaPostThreadDiv = ({
+  gsn,
+  sn,
+  options,
+  onCreateNewThreadByOtherPlayer,
+}: BahaPostThreadProps) => {
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
   const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
     useState<number>(options?.refreshIntervalInSecond ?? 0)
@@ -59,9 +77,48 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
       }
     )
 
+  const filteredCommentChunks = useMemo(() => {
+    if (!options?.filter) {
+      return bahaCommentChunks
+    }
+
+    const filter = options.filter
+
+    return bahaCommentChunks.map((commentChunk) =>
+      commentChunk.filter((comment) => {
+        if (filter.fromUserIds) {
+          if (filter.fromUserIds.indexOf(comment.authorId) === -1) {
+            return false
+          }
+        }
+        if (filter.toUserIds) {
+          if (
+            !filter.toUserIds.filter((userId) =>
+              comment.mentionedUserIdSet.has(userId)
+            )
+          ) {
+            return false
+          }
+        }
+
+        return true
+      })
+    )
+  }, [bahaCommentChunks, options.filter])
+
   const handleClickCollapsePost = useCallback(() => {
     setIsCollapsedPost((prev) => !prev)
   }, [])
+
+  const handleForkNewThreadByOtherUserId = useCallback(
+    async (userId: string) => {
+      onCreateNewThreadByOtherPlayer?.(gsn, sn, {
+        fromUserIds: [userId],
+        toUserIds: [userId],
+      })
+    },
+    [gsn, onCreateNewThreadByOtherPlayer, sn]
+  )
 
   const handleSubmitNewComment = useCallback(
     (newComment: string) => createComment(newComment as string),
@@ -118,9 +175,11 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
 
   return (
     <div className="mx-auto flex flex-col h-full gap-y-4 w-[41em]">
-      <div className={isCollapsedPost ? 'hidden' : ''}>
-        <BahaPostDiv post={bahaPost} />
-      </div>
+      {!options?.hidePost && (
+        <div className={isCollapsedPost ? 'hidden' : ''}>
+          <BahaPostDiv post={bahaPost} />
+        </div>
+      )}
 
       <div className="flex justify-end gap-x-1">
         <div>
@@ -165,13 +224,16 @@ const BahaPostThreadDiv = ({ gsn, sn, options }: BahaPostThreadProps) => {
           controller={scrollerController}
         >
           <div className="space-y-2">
-            {bahaCommentChunks.map((bahaCommentChunk, chunkI) => (
+            {filteredCommentChunks.map((bahaCommentChunk, chunkI) => (
               <React.Fragment key={chunkI}>
                 {bahaCommentChunk.map((bahaComment) => (
                   <BahaCommentDiv
                     key={bahaComment.id}
                     comment={bahaComment}
                     onEdit={handleEditComment}
+                    onForkNewThreadByOtherUserId={
+                      handleForkNewThreadByOtherUserId
+                    }
                   />
                 ))}
               </React.Fragment>

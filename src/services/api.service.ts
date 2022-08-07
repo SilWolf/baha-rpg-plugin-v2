@@ -1,4 +1,6 @@
 import {
+  BahaComment,
+  BahaCommentWithPagination,
   RawBahaComment,
   RawBahaCommentWithPagination,
 } from '../types/bahaComment.type'
@@ -20,7 +22,7 @@ const generateToken = () => {
   return token
 }
 
-const formatComment = (comment: RawBahaComment): RawBahaComment => {
+const convertRawCommentToComment = (comment: RawBahaComment): BahaComment => {
   let newText = comment.text
 
   if (comment.mentions && comment.mentions.length > 0) {
@@ -43,7 +45,11 @@ const formatComment = (comment: RawBahaComment): RawBahaComment => {
 
   return {
     ...comment,
+    rawText: comment.text,
     text: newText,
+    authorId: comment.userid,
+    authorName: comment.name,
+    mentionedUserIdSet: new Set(comment.mentions.map((mention) => mention.id)),
   }
 }
 
@@ -59,28 +65,34 @@ export const getRawPostDetail = (
   ).then((res) => res.json().then((json) => json.data) as Promise<RawBahaPost>)
 }
 
-export const getRawCommentChunkWithPagination = (
+export const getCommentChunkWithPagination = (
   gsn: string | number,
   sn: string | number,
   page: number = 0
-): Promise<RawBahaCommentWithPagination> => {
+): Promise<BahaCommentWithPagination> => {
   return fetch(
     `https://api.gamer.com.tw/guild/v1/comment_list.php?gsn=${gsn}&messageId=${sn}&page=${page}`,
     {
       credentials: 'include',
     }
-  ).then(
-    (res) =>
-      res
-        .json()
-        .then((json) => json.data) as Promise<RawBahaCommentWithPagination>
+  ).then((res) =>
+    res.json().then((json) => {
+      const data = json.data as RawBahaCommentWithPagination
+
+      return {
+        ...data,
+        comments: data.comments.map((comment) =>
+          convertRawCommentToComment(comment)
+        ),
+      }
+    })
   )
 }
 
-export const getRawCommentChunks = (
+export const getCommentChunks = (
   gsn: string | number,
   sn: string | number
-): Promise<RawBahaComment[][]> => {
+): Promise<BahaComment[][]> => {
   return fetch(
     `https://api.gamer.com.tw/guild/v1/comment_list.php?gsn=${gsn}&messageId=${sn}&all`,
     {
@@ -89,16 +101,18 @@ export const getRawCommentChunks = (
   ).then(
     (res) =>
       res.json().then((json) => {
-        const comments = json.data.comments
+        const comments = json.data.comments as RawBahaComment[]
 
-        const newBahaCommentChunks: RawBahaComment[][] = []
+        const newBahaCommentChunks: BahaComment[][] = []
         for (let i = 0; i < comments.length; i += 15) {
           newBahaCommentChunks.push(
-            comments.slice(i, i + 15).map((comment) => formatComment(comment))
+            comments
+              .slice(i, i + 15)
+              .map((comment) => convertRawCommentToComment(comment))
           )
         }
         return newBahaCommentChunks
-      }) as Promise<RawBahaComment[][]>
+      }) as Promise<BahaComment[][]>
   )
 }
 

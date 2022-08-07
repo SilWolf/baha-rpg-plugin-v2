@@ -6,13 +6,13 @@ import React, {
   useState,
 } from 'react'
 import {
-  getRawCommentChunkWithPagination,
-  getRawCommentChunks,
+  getCommentChunkWithPagination,
+  getCommentChunks,
   getRawPostDetail,
   apiCreateComment,
   apiEditComment,
 } from '../services/api.service'
-import { RawBahaComment } from '../types/bahaComment.type'
+import { BahaComment } from '../types/bahaComment.type'
 import { RawBahaPost } from '../types/bahaPost.type'
 
 type PostContextProps = {
@@ -20,10 +20,10 @@ type PostContextProps = {
   setCommentChunks: (
     gsn: string,
     sn: string,
-    bahaCommentChunks: RawBahaComment[][]
+    bahaCommentChunks: BahaComment[][]
   ) => void
   getPost: (gsn: string, sn: string) => RawBahaPost
-  getCommentChunks: (gsn: string, sn: string) => RawBahaComment[][]
+  getCommentChunks: (gsn: string, sn: string) => BahaComment[][]
 }
 
 const PostContext = React.createContext<PostContextProps>({
@@ -46,7 +46,7 @@ export const PostContextProvider = ({
     {}
   )
   const [bahaCommentChunksMap, setBahaCommentChunksMap] = useState<
-    Record<string, RawBahaComment[][]>
+    Record<string, BahaComment[][]>
   >({})
 
   const setPost = useCallback(
@@ -60,7 +60,7 @@ export const PostContextProvider = ({
   )
 
   const setCommentChunks = useCallback(
-    (gsn: string, sn: string, bahaCommentChunks: RawBahaComment[][]) => {
+    (gsn: string, sn: string, bahaCommentChunks: BahaComment[][]) => {
       setBahaCommentChunksMap((prev) => ({
         ...prev,
         [`${gsn}-${sn}`]: bahaCommentChunks,
@@ -124,7 +124,7 @@ const useBahaPost = (
   const loadLatestComments = useCallback(
     async (payload?: OnSuccessLoadCommentsExtraPayload) => {
       const { comments: rawCommentChunk, nextPage: currentChunkIndex } =
-        await getRawCommentChunkWithPagination(gsn, sn)
+        await getCommentChunkWithPagination(gsn, sn)
 
       const newBahaCommentChunks = [...bahaCommentChunks]
       newBahaCommentChunks[currentChunkIndex] = rawCommentChunk
@@ -136,7 +136,7 @@ const useBahaPost = (
         let nextChunkIndex = currentChunkIndex - 1
         while (nextChunkIndex > 0 && currentChunkIndex - nextChunkIndex > 1) {
           newBahaCommentChunks[nextChunkIndex] =
-            await getRawCommentChunkWithPagination(
+            await getCommentChunkWithPagination(
               gsn,
               sn,
               nextChunkIndex + 1
@@ -184,7 +184,7 @@ const useBahaPost = (
       setIsLoading(true)
       Promise.all([
         !bahaPost && getRawPostDetail(gsn, sn),
-        !bahaCommentChunks && getRawCommentChunks(gsn, sn),
+        !bahaCommentChunks && getCommentChunks(gsn, sn),
       ])
         .then(([_post, _commentChunks]) => {
           if (_post) {
