@@ -4,21 +4,33 @@ import BahaPostThreadDiv, {
   BahaPostThreadProps,
 } from '../../components/BahaPostThreadDiv'
 import MasterLayout from '../../layouts/master.layout'
+import { generateId } from '../../utils/string.util'
+
+type BahaPostThreadGroup = {
+  master: BahaPostThreadProps
+  slaves: BahaPostThreadProps[]
+}
 
 const PostDetailPage = () => {
-  const [threads, setThreads] = useState<BahaPostThreadProps[]>([])
+  const [threadGroups, setThreadGroups] = useState<BahaPostThreadGroup[]>([])
 
   const handleCreateNewThreadByOtherPlayer = useCallback(
-    async (gsn: string, sn: string, filter: BahaPostThreadFilter) => {
-      setThreads((prev) => [
-        ...prev,
-        {
-          gsn,
-          sn,
-          isSlave: true,
-          filter,
-        },
-      ])
+    async (threadId: string, filter: BahaPostThreadFilter) => {
+      const threadGroupIndex = threadGroups.findIndex((threadGroup) => {
+        threadGroup.master.threadId === threadId
+      })
+
+      if (threadGroupIndex !== -1) {
+        const newThreadGroups = [...threadGroups]
+        const newThreadGroup = newThreadGroups[threadGroupIndex]
+        newThreadGroup.slaves.push({
+          threadId: generateId(),
+          gsn: newThreadGroup.master.gsn,
+          sn: newThreadGroup.master.sn,
+        })
+
+        setThreadGroups(newThreadGroups)
+      }
     },
     []
   )
@@ -30,11 +42,15 @@ const PostDetailPage = () => {
     const sn = queryParams.get('sn')
 
     if (gsn && sn) {
-      setThreads((prev) => [
+      setThreadGroups((prev) => [
         ...prev,
         {
-          gsn,
-          sn,
+          master: {
+            threadId: generateId(),
+            gsn,
+            sn,
+          },
+          slaves: [],
         },
       ])
     }
@@ -43,10 +59,10 @@ const PostDetailPage = () => {
   return (
     <MasterLayout>
       <div className="px-8 flex justify-center items-stretch gap-x-2 min-h-0 h-full">
-        {threads.map((thread, i) => (
+        {threadGroups.map(({ master, slaves }, i) => (
           <div key={i}>
             <BahaPostThreadDiv
-              {...thread}
+              {...master}
               onCreateNewThreadByOtherPlayer={
                 handleCreateNewThreadByOtherPlayer
               }

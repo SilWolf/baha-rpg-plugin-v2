@@ -18,12 +18,12 @@ export type BahaPostThreadOptions = {
 }
 
 export type BahaPostThreadProps = {
+  threadId: string
   gsn: string
   sn: string
   isSlave?: boolean
   onCreateNewThreadByOtherPlayer?: (
-    gsn: string,
-    sn: string,
+    threadId: string,
     filter: BahaPostThreadFilter
   ) => Promise<unknown>
   options?: BahaPostThreadOptions
@@ -35,6 +35,7 @@ const notifyAudio = new Audio(
 )
 
 const BahaPostThreadDiv = ({
+  threadId,
   gsn,
   sn,
   options,
@@ -115,7 +116,7 @@ const BahaPostThreadDiv = ({
 
   const handleForkNewThreadByOtherUserId = useCallback(
     async (userId: string) => {
-      onCreateNewThreadByOtherPlayer?.(gsn, sn, {
+      onCreateNewThreadByOtherPlayer?.(threadId, {
         fromUserIds: [myUserId, userId],
         toUserIds: [myUserId, userId],
       })

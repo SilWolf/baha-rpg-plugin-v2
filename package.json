@@ -69,5 +69,8 @@
   },
   "config": {
     "port": "8124"
+  },
+  "dependencies": {
+    "nanoid": "^4.0.0"
   }
 }
