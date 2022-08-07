@@ -15,6 +15,7 @@ const PostDetailPage = () => {
         {
           gsn,
           sn,
+          isSlave: true,
           filter,
         },
       ])

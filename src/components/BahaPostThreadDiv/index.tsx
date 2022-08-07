@@ -12,7 +12,6 @@ export type BahaPostThreadFilter = {
 
 export type BahaPostThreadOptions = {
   hidePost?: boolean
-  filter?: BahaPostThreadFilter
   refreshIntervalInSecond?: number
   sound?: boolean
 }
@@ -27,6 +26,7 @@ export type BahaPostThreadProps = {
     filter: BahaPostThreadFilter
   ) => Promise<unknown>
   options?: BahaPostThreadOptions
+  filter?: BahaPostThreadFilter
 }
 
 const notifyAudio = new Audio(
@@ -37,6 +37,8 @@ const BahaPostThreadDiv = ({
   gsn,
   sn,
   options,
+  filter,
+  isSlave,
   onCreateNewThreadByOtherPlayer,
 }: BahaPostThreadProps) => {
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
@@ -78,11 +80,9 @@ const BahaPostThreadDiv = ({
     )
 
   const filteredCommentChunks = useMemo(() => {
-    if (!options?.filter) {
+    if (!filter) {
       return bahaCommentChunks
     }
-
-    const filter = options.filter
 
     return bahaCommentChunks.map((commentChunk) =>
       commentChunk.filter((comment) => {
@@ -93,9 +93,9 @@ const BahaPostThreadDiv = ({
         }
         if (filter.toUserIds) {
           if (
-            !filter.toUserIds.filter((userId) =>
+            filter.toUserIds.findIndex((userId) =>
               comment.mentionedUserIdSet.has(userId)
-            )
+            ) === -1
           ) {
             return false
           }
@@ -104,7 +104,7 @@ const BahaPostThreadDiv = ({
         return true
       })
     )
-  }, [bahaCommentChunks, options.filter])
+  }, [bahaCommentChunks, filter])
 
   const handleClickCollapsePost = useCallback(() => {
     setIsCollapsedPost((prev) => !prev)
@@ -175,48 +175,50 @@ const BahaPostThreadDiv = ({
 
   return (
     <div className="mx-auto flex flex-col h-full gap-y-4 w-[41em]">
-      {!options?.hidePost && (
+      {!options?.hidePost && !isSlave && (
         <div className={isCollapsedPost ? 'hidden' : ''}>
           <BahaPostDiv post={bahaPost} />
         </div>
       )}
 
-      <div className="flex justify-end gap-x-1">
-        <div>
-          <button
-            onClick={handleClickRefreshInterval}
-            className={refreshIntervalInSecond > 0 ? 'bg-green-400' : ''}
-          >
-            <i className="bi bi-stopwatch" />{' '}
-            <span>
-              {refreshIntervalInSecond > 0
-                ? `自動更新: ${refreshIntervalInSecond}秒`
-                : '自動更新: 關閉'}
-            </span>
-          </button>
+      {!isSlave && (
+        <div className="flex justify-end gap-x-1">
+          <div>
+            <button
+              onClick={handleClickRefreshInterval}
+              className={refreshIntervalInSecond > 0 ? 'bg-green-400' : ''}
+            >
+              <i className="bi bi-stopwatch" />{' '}
+              <span>
+                {refreshIntervalInSecond > 0
+                  ? `自動更新: ${refreshIntervalInSecond}秒`
+                  : '自動更新: 關閉'}
+              </span>
+            </button>
+          </div>
+          <div>
+            <button
+              onClick={handleClickEnableSound}
+              className={isEnableSound ? 'bg-green-400' : ''}
+            >
+              <i className="bi bi-bell" />{' '}
+              <span>聲音通知: {isEnableSound ? '開啟' : '關閉'}</span>
+            </button>
+          </div>
+          <div>
+            <button onClick={handleClickCollapsePost}>
+              <i
+                className={
+                  isCollapsedPost
+                    ? 'bi bi-chevron-expand'
+                    : 'bi bi-chevron-contract'
+                }
+              />
+              {isCollapsedPost ? '展開串頭' : '收起串頭'}
+            </button>
+          </div>
         </div>
-        <div>
-          <button
-            onClick={handleClickEnableSound}
-            className={isEnableSound ? 'bg-green-400' : ''}
-          >
-            <i className="bi bi-bell" />{' '}
-            <span>聲音通知: {isEnableSound ? '開啟' : '關閉'}</span>
-          </button>
-        </div>
-        <div>
-          <button onClick={handleClickCollapsePost}>
-            <i
-              className={
-                isCollapsedPost
-                  ? 'bi bi-chevron-expand'
-                  : 'bi bi-chevron-contract'
-              }
-            />
-            {isCollapsedPost ? '展開串頭' : '收起串頭'}
-          </button>
-        </div>
-      </div>
+      )}
 
       <div className="flex-1 min-h-0">
         <Scroller
