@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import useBahaPost from '../../hooks/useBahaPost'
+import useMe from '../../hooks/useMe'
 import BahaCommentDiv from '../BahaCommentDiv'
 import BahaCommentTextarea from '../BahaCommentTextarea'
 import BahaPostDiv from '../BahaPostDiv'
@@ -41,6 +42,8 @@ const BahaPostThreadDiv = ({
   isSlave,
   onCreateNewThreadByOtherPlayer,
 }: BahaPostThreadProps) => {
+  const { myUserId } = useMe()
+
   const [isCollapsedPost, setIsCollapsedPost] = useState<boolean>(false)
   const [refreshIntervalInSecond, setRefreshIntervalInSecond] =
     useState<number>(options?.refreshIntervalInSecond ?? 0)
@@ -113,11 +116,11 @@ const BahaPostThreadDiv = ({
   const handleForkNewThreadByOtherUserId = useCallback(
     async (userId: string) => {
       onCreateNewThreadByOtherPlayer?.(gsn, sn, {
-        fromUserIds: [userId],
-        toUserIds: [userId],
+        fromUserIds: [myUserId, userId],
+        toUserIds: [myUserId, userId],
       })
     },
-    [gsn, onCreateNewThreadByOtherPlayer, sn]
+    [gsn, myUserId, onCreateNewThreadByOtherPlayer, sn]
   )
 
   const handleSubmitNewComment = useCallback(
