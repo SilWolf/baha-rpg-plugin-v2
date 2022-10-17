@@ -60,9 +60,10 @@ export const useScroller = (): UseScroller => {
 
 type Props = HTMLAttributes<HTMLDivElement> & {
   controller?: UseScroller['controller']
+  isHorizontal?: boolean
 }
 
-const Scroller = ({ controller, ...props }: Props) => {
+const Scroller = ({ controller, isHorizontal, ...props }: Props) => {
   const sb = useRef<SimpleBar>()
 
   useEffect(() => {

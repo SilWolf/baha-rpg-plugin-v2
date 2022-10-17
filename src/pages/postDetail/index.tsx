@@ -3,6 +3,7 @@ import BahaPostThreadDiv, {
   BahaPostThreadFilter,
   BahaPostThreadProps,
 } from '../../components/BahaPostThreadDiv'
+import Scroller from '../../components/common/Scroller'
 import MasterLayout from '../../layouts/master.layout'
 import { generateId } from '../../utils/string.util'
 
@@ -27,12 +28,13 @@ const PostDetailPage = () => {
           threadId: generateId(),
           gsn: newThreadGroup.master.gsn,
           sn: newThreadGroup.master.sn,
+          filter,
         })
 
         setThreadGroups(newThreadGroups)
       }
     },
-    []
+    [threadGroups]
   )
 
   useEffect(() => {
@@ -60,14 +62,24 @@ const PostDetailPage = () => {
     <MasterLayout>
       <div className="px-8 flex justify-center items-stretch gap-x-2 min-h-0 h-full">
         {threadGroups.map(({ master, slaves }, i) => (
-          <div key={i}>
-            <BahaPostThreadDiv
-              {...master}
-              onCreateNewThreadByOtherPlayer={
-                handleCreateNewThreadByOtherPlayer
-              }
-            />
-          </div>
+          <React.Fragment key={master.threadId}>
+            <div>
+              <BahaPostThreadDiv
+                {...master}
+                onCreateNewThreadByOtherPlayer={
+                  handleCreateNewThreadByOtherPlayer
+                }
+              />
+            </div>
+            {slaves.length > 0 && (
+              <div className="flex-1">
+                <Scroller>
+                {slaves.map((slave) => (
+                  <BahaPostThreadDiv key={slave.threadId} {...slave} isSlave />
+                ))}</Scroller>
+              </div>
+            )}
+          </React.Fragment>
         ))}
       </div>
     </MasterLayout>

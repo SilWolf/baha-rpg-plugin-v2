@@ -121,7 +121,7 @@ const BahaPostThreadDiv = ({
         toUserIds: [myUserId, userId],
       })
     },
-    [gsn, myUserId, onCreateNewThreadByOtherPlayer, sn]
+    [myUserId, onCreateNewThreadByOtherPlayer, threadId]
   )
 
   const handleSubmitNewComment = useCallback(
